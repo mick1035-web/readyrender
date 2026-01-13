@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Projects collection
+    match /projects/{projectId} {
+      // Users can read their own projects
+      allow read: if isOwner(resource.data.userId);
+      
+      // Users can create projects with their own userId
+      allow create: if isAuthenticated() 
+                    && request.resource.data.userId == request.auth.uid;
+      
+      // Users can update their own projects
+      allow update: if isOwner(resource.data.userId);
+      
+      // Users can delete their own projects
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own data
+      allow read: if isOwner(userId);
+      
+      // Users can create their own profile
+      allow create: if isOwner(userId);
+      
+      // Users can update their own profile
+      allow update: if isOwner(userId);
+      
+      // Subcollection: User's custom HDRIs
+      match /hdris/{hdriId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+      
+      // Subcollection: User's subscription data
+      match /subscription/{document=**} {
+        allow read: if isOwner(userId);
+        // Only allow server-side writes for subscription data
+        allow write: if false;
+      }
+    }
+    
+    // Subscription plans (read-only for clients)
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Analytics and logs (server-only)
+    match /analytics/{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

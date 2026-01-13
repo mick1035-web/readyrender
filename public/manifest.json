@@ -1,0 +1,36 @@
+{
+    "name": "ReadyRender - 3D Video Generator",
+    "short_name": "ReadyRender",
+    "description": "Create stunning 3D product videos with AI-powered tools",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#3b82f6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "productivity",
+        "graphics",
+        "utilities"
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshot-1.png",
+            "sizes": "1280x720",
+            "type": "image/png"
+        }
+    ]
+}

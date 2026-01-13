@@ -1,0 +1,5 @@
+.env
+owla_mvp/
+../owla_mvp/
+node_modules/
+.next/
