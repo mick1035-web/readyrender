@@ -49,7 +49,7 @@ export function validateFile(
     // 1. Check file size (DISABLED - no size limit)
     // Warning: Large files may cause performance issues
     if (file.size > MAX_FILE_SIZE) {
-        console.warn(`⚠️ Large file detected: ${formatFileSize(file.size)}. This may cause performance issues.`)
+        console.warn(`Large file detected: ${formatFileSize(file.size)}. This may cause performance issues.`)
         // Size check disabled - allow upload to proceed
     }
 

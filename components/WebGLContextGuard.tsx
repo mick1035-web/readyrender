@@ -15,7 +15,7 @@ export default function WebGLContextGuard({ children }: { children: React.ReactN
             // Log memory usage if available (Chrome only)
             if ((performance as any).memory) {
                 const memory = (performance as any).memory
-                console.error('💾 Memory usage:', {
+                console.error('Memory usage:', {
                     used: Math.round(memory.usedJSHeapSize / 1024 / 1024) + 'MB',
                     total: Math.round(memory.totalJSHeapSize / 1024 / 1024) + 'MB',
                     limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024) + 'MB'
@@ -27,7 +27,7 @@ export default function WebGLContextGuard({ children }: { children: React.ReactN
             // setErrorInfo('The 3D model may be too complex for your GPU. Try uploading a simpler model or reducing polygon count.')
 
             // Just log the error, don't show blocking screen
-            console.warn('⚠️ WebGL context lost, but continuing anyway. You may need to reload the page if rendering stops.')
+            console.warn('WebGL context lost, but continuing anyway. You may need to reload the page if rendering stops.')
         }
 
         const handleContextRestored = () => {

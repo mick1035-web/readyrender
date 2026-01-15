@@ -56,11 +56,11 @@ function ObjModel({ url }: { url: string }) {
         // Count polygons after load
         const count = countPolygons(obj)
         setPolyCount(count)
-        console.log(`📊 OBJ Model loaded: ${count.toLocaleString()} polygons`)
+        console.log(`Model loaded: ${count.toLocaleString()} polygons`)
 
         // Cleanup function
         return () => {
-            console.log('🧹 Disposing OBJ model resources...')
+            console.log('Disposing model resources...')
             obj.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
                     if (child.geometry) child.geometry.dispose()
@@ -73,7 +73,7 @@ function ObjModel({ url }: { url: string }) {
                     }
                 }
             })
-            console.log('✅ OBJ model disposed')
+            console.log('Model disposed')
         }
     }, [obj])
 
@@ -103,11 +103,9 @@ function GltfModel({ url }: { url: string }) {
         setPolyCount(count)
         console.log(`📊 GLTF Model loaded: ${count.toLocaleString()} polygons`)
 
-        // TEMPORARY: Cleanup disabled to test if this is causing crashes
-        // TODO: Re-enable with proper solution
-        /*
+        // Cleanup resources when the model component unmounts
         return () => {
-            console.log('🧹 Disposing GLTF model resources...')
+            console.log('Disposing GLTF model resources...')
             scene.traverse((child) => {
                 if (child instanceof THREE.Mesh) {
                     if (child.geometry) {
@@ -124,9 +122,8 @@ function GltfModel({ url }: { url: string }) {
                     }
                 }
             })
-            console.log('✅ GLTF model disposed (cache preserved for reuse)')
+            console.log('GLTF model disposed (cache preserved for reuse)')
         }
-        */
     }, [scene])
 
     useMemo(() => {
@@ -228,7 +225,7 @@ export default React.memo(function AnimationWrapper({ url, animation, modelType,
                 const count = modelRef.current.userData.polygonCount
                 if (count > 100000 && !showWarning) {
                     setShowWarning(true)
-                    console.warn(`⚠️ Model has ${count.toLocaleString()} polygons. May cause performance issues.`)
+                    console.warn(`Model has ${count.toLocaleString()} polygons. May cause performance issues.`)
                 }
             }
         }

@@ -17,12 +17,12 @@ export default function WebGLContextRecovery() {
 
         const handleContextLost = (event: Event) => {
             event.preventDefault()
-            console.warn('⚠️ WebGL context lost - attempting to restore...')
+            console.warn('WebGL context lost - attempting to restore...')
 
             // Log memory usage if available (Chrome only)
             if ((performance as any).memory) {
                 const memory = (performance as any).memory
-                console.warn('💾 Memory usage:', {
+                console.warn('Memory usage:', {
                     used: Math.round(memory.usedJSHeapSize / 1024 / 1024) + 'MB',
                     total: Math.round(memory.totalJSHeapSize / 1024 / 1024) + 'MB',
                     limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024) + 'MB'
@@ -31,7 +31,7 @@ export default function WebGLContextRecovery() {
         }
 
         const handleContextRestored = () => {
-            console.log('✅ WebGL context restored successfully')
+            console.log('WebGL context restored successfully')
             // Force a re-render by invalidating the renderer
             gl.resetState()
         }

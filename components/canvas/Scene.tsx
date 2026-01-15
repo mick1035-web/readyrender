@@ -33,6 +33,9 @@ function CustomEnvironment({
     useEffect(() => {
         if (!envUrl) return
 
+        let isMounted = true
+        let loadedTextureInstance: THREE.Texture | null = null
+
         const loadTexture = async () => {
             try {
                 let loader: any
@@ -48,35 +51,52 @@ function CustomEnvironment({
                     loader = new THREE.TextureLoader()
                 }
 
+                // Crucial for loading from external URLs (like Replicate/Firebase)
+                loader.setCrossOrigin('anonymous')
+
                 loader.load(
                     envUrl,
                     (loadedTexture: THREE.Texture) => {
+                        if (!isMounted) {
+                            loadedTexture.dispose()
+                            return
+                        }
                         loadedTexture.minFilter = THREE.LinearFilter
                         loadedTexture.magFilter = THREE.LinearFilter
                         loadedTexture.anisotropy = 16
                         loadedTexture.generateMipmaps = false
+
+                        loadedTextureInstance = loadedTexture
                         setTexture(loadedTexture)
+                        console.log('Successfully loaded environment texture:', envUrl)
                     },
                     undefined,
                     (error: any) => {
-                        console.error('Failed to load texture:', error)
+                        if (!isMounted) return
+                        console.error('Failed to load texture:', {
+                            url: envUrl,
+                            error: error?.message || 'Unknown error (CORS or Network failure)',
+                            info: error
+                        })
                     }
                 )
-            } catch (error) {
+            } catch (error: any) {
+                if (!isMounted) return
                 console.error('Failed to initialize loader:', error)
             }
         }
 
         loadTexture()
 
-        // Cleanup: Dispose texture when envUrl changes or component unmounts
         return () => {
-            if (texture) {
-                texture.dispose()
-                console.log('🧹 Disposed environment texture')
+            isMounted = false
+            if (loadedTextureInstance) {
+                loadedTextureInstance.dispose()
+                console.log('Disposed environment texture instance')
             }
+            setTexture(null)
         }
-    }, [envUrl, texture])
+    }, [envUrl])
 
     if (!texture) return null
 
@@ -155,13 +175,13 @@ export default function Scene() {
     const envUrl = hdriMode === 'custom' && activeHdriId
         ? customHdris.find(h => h.id === activeHdriId)?.url
         : null
-    const envPreset = hdriMode === 'preset' && activeHdriId ? activeHdriId : 'city'
+    const envPreset = hdriMode === 'preset' && activeHdriId ? activeHdriId : 'none'
 
     return (
         <div className="relative w-full h-full">
             <Canvas
                 shadows
-                camera={{ position: [0, 0, 5], fov: 50 }}
+                camera={{ position: [0, 8, 0], fov: 50 }}
                 gl={{
                     preserveDrawingBuffer: true,
                     alpha: false,  // Disable alpha to save memory

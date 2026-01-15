@@ -43,6 +43,7 @@ export interface ExportSettings {
     quality: '720p' | '1080p' | '4k'
     aspectRatio: '16:9' | '1:1' | '9:16'
     transparent: boolean
+    format: 'mp4' | 'hevc'
 }
 
 export type PopupStep = 'idle' | 'ask' | 'preview' | 'render'
@@ -181,18 +182,18 @@ interface StoreState {
     activeHdriId: string | null
     setActiveHdri: (mode: 'preset' | 'custom' | 'none', id?: string) => void
 
-    // Tutorial System
+    // Contextual Tutorial System
     tutorial: {
-        isActive: boolean
-        currentStep: number
-        completed: boolean
-        skipped: boolean
+        activeTip: any | null // Using any for now to avoid circular import or define interface here
+        shownTips: string[]
+        completedActions: string[]
+        enabled: boolean
     }
-    startTutorial: () => void
-    nextTutorialStep: () => void
-    skipTutorial: () => void
-    completeTutorial: () => void
+    checkAndShowTip: (trigger: string) => void
+    dismissTip: () => void
+    markActionComplete: (action: string) => void
     resetTutorial: () => void
+    disableTutorial: () => void
 
     // Legacy states (kept for backward compatibility)
     selectedPreset: string
@@ -210,7 +211,7 @@ export const useStore = create<StoreState>()(
             modelUrl: null,
             modelType: null,
             setModelUrl: (url, type) => set({ modelUrl: url, modelType: type }),
-            envPreset: 'city',
+            envPreset: 'none',
             setEnvPreset: (preset) => set({ envPreset: preset, customEnvUrl: null }),
             stylePreset: 'natural',
             setStylePreset: (preset) => set({ stylePreset: preset }),
@@ -305,7 +306,7 @@ export const useStore = create<StoreState>()(
 
             applyPreset: (presetId, isCustom = false) => {
                 try {
-                    console.log('🎬 Applying preset:', { presetId, isCustom })
+                    console.log('Applying preset:', { presetId, isCustom })
 
                     const state = get()
                     const preset = isCustom
@@ -313,11 +314,11 @@ export const useStore = create<StoreState>()(
                         : CAMERA_PRESETS.find(p => p.id === presetId)
 
                     if (!preset) {
-                        console.error('❌ Preset not found:', presetId)
+                        console.error('Preset not found:', presetId)
                         return
                     }
 
-                    console.log('✅ Preset found:', preset.label, 'with', preset.keyframes.length, 'keyframes')
+                    console.log('Preset found:', preset.label, 'with', preset.keyframes.length, 'keyframes')
 
                     const newKeyframes: Keyframe[] = preset.keyframes.map((k, index) => {
                         let imageConfig = (k as any).imageConfig
@@ -333,7 +334,7 @@ export const useStore = create<StoreState>()(
                             imageConfig
                         }
 
-                        console.log(`  📍 Keyframe ${index + 1}:`, {
+                        console.log(`  Keyframe ${index + 1}:`, {
                             hasCamera: !!k.cameraState,
                             hasText: !!k.textConfig,
                             hasImage: !!imageConfig
@@ -342,7 +343,7 @@ export const useStore = create<StoreState>()(
                         return keyframe
                     })
 
-                    console.log('🔄 Setting new state with', newKeyframes.length, 'keyframes')
+                    console.log('Setting new state with', newKeyframes.length, 'keyframes')
 
                     set({
                         keyframes: newKeyframes,
@@ -362,9 +363,9 @@ export const useStore = create<StoreState>()(
                         isTemplateManagerOpen: false
                     })
 
-                    console.log('✅ Preset applied successfully!')
+                    console.log('Preset applied successfully!')
                 } catch (error) {
-                    console.error('💥 Error applying preset:', error)
+                    console.error('Error applying preset:', error)
                     console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
                     throw error // Re-throw to show error boundary
                 }
@@ -504,7 +505,8 @@ export const useStore = create<StoreState>()(
             exportSettings: {
                 quality: '720p',
                 aspectRatio: '16:9',
-                transparent: false
+                transparent: false,
+                format: 'mp4'
             },
             setExportSettings: (settings) => set((state) => ({
                 exportSettings: { ...state.exportSettings, ...settings }
@@ -655,86 +657,95 @@ export const useStore = create<StoreState>()(
                 }
             }),
 
-            // Tutorial System Implementation
+            // Contextual Tutorial System Implementation
             tutorial: (() => {
                 if (typeof window === 'undefined') return {
-                    isActive: false,
-                    currentStep: 0,
-                    completed: false,
-                    skipped: false
+                    activeTip: null,
+                    shownTips: [],
+                    completedActions: [],
+                    enabled: true
                 }
                 try {
-                    const completed = localStorage.getItem('tutorial_completed') === 'true'
-                    const skipped = localStorage.getItem('tutorial_skipped') === 'true'
-                    const currentStep = parseInt(localStorage.getItem('tutorial_step') || '0')
+                    const shownTips = JSON.parse(localStorage.getItem('tutorial_shown_tips') || '[]')
+                    const completedActions = JSON.parse(localStorage.getItem('tutorial_completed_actions') || '[]')
+                    const enabled = localStorage.getItem('tutorial_enabled') !== 'false'
                     return {
-                        isActive: false,
-                        currentStep: completed || skipped ? 0 : currentStep,
-                        completed,
-                        skipped
+                        activeTip: null,
+                        shownTips,
+                        completedActions,
+                        enabled
                     }
                 } catch (e) {
                     return {
-                        isActive: false,
-                        currentStep: 0,
-                        completed: false,
-                        skipped: false
+                        activeTip: null,
+                        shownTips: [],
+                        completedActions: [],
+                        enabled: true
                     }
                 }
             })(),
 
-            startTutorial: () => {
-                set({ tutorial: { isActive: true, currentStep: 0, completed: false, skipped: false } })
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('tutorial_started', 'true')
-                    localStorage.setItem('tutorial_step', '0')
-                }
-            },
+            checkAndShowTip: (trigger) => {
+                const { tutorial } = get()
+                if (!tutorial.enabled || tutorial.activeTip) return
 
-            nextTutorialStep: () => {
-                const { currentStep } = get().tutorial
-                const nextStep = currentStep + 1
-                const totalSteps = 18 // Total tutorial steps
+                // Import contextualTips here to avoid circular dependency if possible, 
+                // but since this is inside the store, we'll need to make sure it's accessible.
+                const { contextualTips } = require('@/lib/tutorialSteps')
 
-                if (nextStep >= totalSteps) {
-                    get().completeTutorial()
-                } else {
+                const tip = contextualTips.find((t: any) =>
+                    t.trigger === trigger &&
+                    (!t.showOnce || !tutorial.shownTips.includes(t.id))
+                )
+
+                if (tip) {
                     set(state => ({
-                        tutorial: { ...state.tutorial, currentStep: nextStep }
+                        tutorial: {
+                            ...state.tutorial,
+                            activeTip: tip,
+                            shownTips: [...state.tutorial.shownTips, tip.id]
+                        }
                     }))
-                    if (typeof window !== 'undefined') {
-                        localStorage.setItem('tutorial_step', nextStep.toString())
+                    localStorage.setItem('tutorial_shown_tips', JSON.stringify([...get().tutorial.shownTips]))
+                }
+            },
+
+            dismissTip: () => set(state => ({
+                tutorial: { ...state.tutorial, activeTip: null }
+            })),
+
+            markActionComplete: (action) => {
+                const { tutorial } = get()
+                if (tutorial.completedActions.includes(action)) return
+
+                set(state => ({
+                    tutorial: {
+                        ...state.tutorial,
+                        completedActions: [...state.tutorial.completedActions, action]
                     }
-                }
-            },
-
-            skipTutorial: () => {
-                set(state => ({
-                    tutorial: { ...state.tutorial, isActive: false, skipped: true }
                 }))
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('tutorial_skipped', 'true')
-                }
-            },
-
-            completeTutorial: () => {
-                set(state => ({
-                    tutorial: { ...state.tutorial, isActive: false, completed: true }
-                }))
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('tutorial_completed', 'true')
-                    localStorage.removeItem('tutorial_step')
-                }
+                localStorage.setItem('tutorial_completed_actions', JSON.stringify([...get().tutorial.completedActions]))
             },
 
             resetTutorial: () => {
-                set({ tutorial: { isActive: false, currentStep: 0, completed: false, skipped: false } })
-                if (typeof window !== 'undefined') {
-                    localStorage.removeItem('tutorial_completed')
-                    localStorage.removeItem('tutorial_skipped')
-                    localStorage.removeItem('tutorial_step')
-                    localStorage.removeItem('tutorial_started')
-                }
+                set({
+                    tutorial: {
+                        activeTip: null,
+                        shownTips: [],
+                        completedActions: [],
+                        enabled: true
+                    }
+                })
+                localStorage.removeItem('tutorial_shown_tips')
+                localStorage.removeItem('tutorial_completed_actions')
+                localStorage.setItem('tutorial_enabled', 'true')
+            },
+
+            disableTutorial: () => {
+                set(state => ({
+                    tutorial: { ...state.tutorial, enabled: false, activeTip: null }
+                }))
+                localStorage.setItem('tutorial_enabled', 'false')
             },
 
             // Legacy states

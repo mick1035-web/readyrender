@@ -10,7 +10,7 @@ import { useUndoRedo } from '@/hooks/useUndoRedo'
 import { captureThumbnail } from '@/lib/captureThumbnail'
 import dynamic from 'next/dynamic'
 import WebGLContextGuard from '@/components/WebGLContextGuard'
-import TutorialOverlay from '@/components/tutorial/TutorialOverlay'
+import TutorialModal from '@/components/tutorial/TutorialModal'
 import { errorHandler } from '@/lib/errorHandler'
 import { ErrorType } from '@/types/errors'
 
@@ -69,10 +69,11 @@ export default function EditorPage() {
     const modelUrl = useStore(s => s.modelUrl)
     const envPreset = useStore(s => s.envPreset)
     const canvasRef = useStore(s => s.canvasRef)
+    const checkAndShowTip = useStore(s => s.checkAndShowTip)
 
     // Helper: Reset store to default values (for new projects)
     const resetStoreToDefaults = () => {
-        console.log('🔄 Resetting store to defaults for new project')
+        console.log('Resetting store to defaults for new project')
 
         // CRITICAL: Use a single setState call to batch all updates
         // This prevents triggering 20+ individual re-renders
@@ -112,7 +113,8 @@ export default function EditorPage() {
             exportSettings: {
                 quality: '720p',
                 aspectRatio: '16:9',
-                transparent: false
+                transparent: false,
+                format: 'mp4'
             },
             aspectRatio: '16:9'
         }, true) // IMPORTANT: 'true' replaces the entire state, preventing partial updates
@@ -201,6 +203,15 @@ export default function EditorPage() {
         loadProject()
     }, [projectId, user, router])
 
+    // 自動啟動教學提示
+    useEffect(() => {
+        if (!loading && !modelUrl) {
+            checkAndShowTip('editor_load')
+        } else if (!loading && modelUrl) {
+            checkAndShowTip('model_uploaded')
+        }
+    }, [loading, modelUrl, checkAndShowTip])
+
     // 2. 儲存專案 (Save Project)
     const handleSave = useCallback(async () => {
         if (!projectId || saving) return
@@ -254,8 +265,23 @@ export default function EditorPage() {
             })
 
             const docRef = doc(db, "projects", projectId)
+
+            // 📸 Capture and upload thumbnail before updating Firestore
+            let thumbnailUrl = undefined
+            if (canvasRef) {
+                try {
+                    console.log('📸 Capturing thumbnail during save...')
+                    thumbnailUrl = await captureThumbnail(canvasRef, projectId)
+                    console.log('✅ Thumbnail captured:', thumbnailUrl)
+                } catch (thumbError) {
+                    console.error('⚠️ Failed to capture thumbnail:', thumbError)
+                    // Continue saving even if thumbnail fails
+                }
+            }
+
             await updateDoc(docRef, {
                 storeState: stateToSave,
+                ...(thumbnailUrl ? { thumbnail: thumbnailUrl } : {}),
                 updatedAt: serverTimestamp()
             })
 
@@ -281,54 +307,6 @@ export default function EditorPage() {
         }
     }, [projectId, saving])
 
-    // DISABLED: Thumbnail capture causes model to reload multiple times
-    // TODO: Re-enable with proper fix to prevent reload loops
-    /*
-    useEffect(() => {
-        console.log('🔍 Thumbnail capture check:', {
-            hasCanvas: !!canvasRef,
-            hasProjectId: !!projectId,
-            hasModel: !!modelUrl,
-            isLoading: loading
-        })
-
-        // Clear any existing timeout
-        if (thumbnailTimeoutRef.current) {
-            clearTimeout(thumbnailTimeoutRef.current)
-        }
-
-        // Only capture if we have a canvas, project ID, and model loaded
-        if (!canvasRef || !projectId || !modelUrl || loading) {
-            console.log('⏭️ Skipping thumbnail capture - requirements not met')
-            return
-        }
-
-        // Longer debounce (2000ms) to ensure scene is fully loaded
-        thumbnailTimeoutRef.current = setTimeout(async () => {
-            try {
-                console.log('📸 Capturing thumbnail...')
-                const thumbnailUrl = await captureThumbnail(canvasRef, projectId)
-
-                // Update Firestore with thumbnail URL
-                const docRef = doc(db, 'projects', projectId)
-                await updateDoc(docRef, {
-                    thumbnail: thumbnailUrl,
-                    updatedAt: serverTimestamp()
-                })
-
-                console.log('✅ Thumbnail updated:', thumbnailUrl)
-            } catch (error) {
-                console.error('❌ Error capturing thumbnail:', error)
-            }
-        }, 2000) // 2 second delay to ensure scene is fully rendered
-
-        return () => {
-            if (thumbnailTimeoutRef.current) {
-                clearTimeout(thumbnailTimeoutRef.current)
-            }
-        }
-    }, [modelUrl, projectId, loading]) // Removed canvasRef - it changes too frequently
-    */
 
     // 自動儲存 (可選：每 60 秒自動存一次)
     useEffect(() => {
@@ -350,7 +328,7 @@ export default function EditorPage() {
 
     return (
         <WebGLContextGuard>
-            <TutorialOverlay />
+            <TutorialModal />
             <div className="flex h-screen bg-black text-white overflow-hidden">
 
                 {/* Left Sidebar */}
@@ -406,7 +384,7 @@ export default function EditorPage() {
                     <ConversionProgress
                         progress={conversionProgress}
                         stage={conversionStage}
-                        format="mp4"
+                        format={exportSettings.format}
                     />
                 )}
             </div>

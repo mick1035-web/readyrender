@@ -21,8 +21,13 @@ export default function TextPropertyPanel() {
 
     useEffect(() => {
         if (!editingTextId) return
-        const keyframe = keyframes.find(k => k.id === editingTextId)
-        if (keyframe && !keyframe.textConfig) {
+
+        // Use a stable reference to prevent infinite loops during StrictMode double-execution (if re-enabled)
+        // or during rapid switching.
+        const targetKeyframe = keyframes.find(k => k.id === editingTextId)
+
+        if (targetKeyframe && !targetKeyframe.textConfig) {
+            console.log('Initializing default text config for:', editingTextId)
             updateKeyframeText(editingTextId, getDefaultConfig())
         }
     }, [editingTextId, keyframes, updateKeyframeText])

@@ -49,7 +49,7 @@ export default function AiGenerateConfirmDialog({
                         </p>
                         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
                             <p className="text-sm text-yellow-200">
-                                ⏱️ <strong>Generation takes approximately 30 seconds.</strong>
+                                <strong>Generation takes approximately 30 seconds.</strong>
                             </p>
                             <p className="text-xs text-yellow-300/80 mt-1">
                                 Please wait while we create your custom environment.
@@ -57,7 +57,7 @@ export default function AiGenerateConfirmDialog({
                         </div>
                         <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3 mb-4">
                             <p className="text-sm text-zinc-400">
-                                💰 Cost: <span className="text-white font-semibold">{cost} credits</span>
+                                Cost: <span className="text-white font-semibold">{cost} credits</span>
                             </p>
                             <p className="text-xs text-zinc-500 mt-1">
                                 Credits will be deducted only after successful generation.
@@ -78,7 +78,7 @@ export default function AiGenerateConfirmDialog({
 
                         {!hasEnoughCredits && (
                             <div className="mt-3 p-2 bg-red-900/20 border border-red-700/30 rounded text-xs text-red-200">
-                                ⚠️ Insufficient credits! You need {cost - balance} more credits.
+                                Insufficient credits! You need {cost - balance} more credits.
                             </div>
                         )}
                     </div>

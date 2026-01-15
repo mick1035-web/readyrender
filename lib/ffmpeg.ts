@@ -28,9 +28,9 @@ class FFmpegService {
             })
 
             this.loaded = true
-            console.log('✅ FFmpeg loaded successfully')
+            console.log('FFmpeg loaded successfully')
         } catch (error) {
-            console.error('❌ FFmpeg load failed:', error)
+            console.error('FFmpeg load failed:', error)
             throw error
         }
     }
@@ -47,7 +47,7 @@ class FFmpegService {
             throw new Error('FFmpeg not loaded. Call load() first.')
         }
 
-        console.log('🎬 Starting MP4 conversion...')
+        console.log('Starting MP4 conversion...')
 
         // Write input file to virtual filesystem
         await this.ffmpeg.writeFile('input.webm', await fetchFile(webmBlob))
@@ -77,7 +77,7 @@ class FFmpegService {
         await this.ffmpeg.deleteFile('input.webm')
         await this.ffmpeg.deleteFile('output.mp4')
 
-        console.log('✅ MP4 conversion complete')
+        console.log('MP4 conversion complete')
         return new Blob([new Uint8Array(data)], { type: 'video/mp4' })
     }
 
@@ -93,7 +93,7 @@ class FFmpegService {
             throw new Error('FFmpeg not loaded. Call load() first.')
         }
 
-        console.log('✨ Starting HEVC conversion with alpha...')
+        console.log('Starting HEVC conversion with alpha...')
 
         // Write input file to virtual filesystem
         await this.ffmpeg.writeFile('input.webm', await fetchFile(webmBlob))
@@ -124,7 +124,7 @@ class FFmpegService {
         await this.ffmpeg.deleteFile('input.webm')
         await this.ffmpeg.deleteFile('output.mov')
 
-        console.log('✅ HEVC conversion complete')
+        console.log('HEVC conversion complete')
         return new Blob([new Uint8Array(data)], { type: 'video/quicktime' })
     }
 
@@ -142,7 +142,7 @@ class FFmpegService {
         if (this.ffmpeg) {
             this.ffmpeg = null
             this.loaded = false
-            console.log('🧹 FFmpeg cleaned up')
+            console.log('FFmpeg cleaned up')
         }
     }
 }

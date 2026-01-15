@@ -23,7 +23,12 @@ export default function HomePage() {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
                 <Video size={24} className="text-white" />
               </div>
-              <span className="text-2xl font-bold tracking-tight">ReadyRender</span>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold tracking-tight">ReadyRender</span>
+                <span className="px-2 py-0.5 text-xs font-semibold rounded bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                  BETA
+                </span>
+              </div>
             </div>
 
             {/* User Account Menu */}

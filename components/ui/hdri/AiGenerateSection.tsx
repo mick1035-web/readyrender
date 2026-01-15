@@ -12,10 +12,10 @@ import { errorHandler } from '@/lib/errorHandler'
 import { ErrorType } from '@/types/errors'
 
 const PRESET_PROMPTS = [
-    { label: '🏙️ Studio', keywords: 'modern photography studio with softbox lights' },
-    { label: '🌅 Sunset', keywords: 'beautiful sunset with warm golden hour lighting' },
-    { label: '🌲 Nature', keywords: 'lush forest with natural daylight' },
-    { label: '🌃 Cyberpunk', keywords: 'cyberpunk city with neon lights at night' },
+    { label: 'Studio', keywords: 'modern photography studio with softbox lights' },
+    { label: 'Sunset', keywords: 'beautiful sunset with warm golden hour lighting' },
+    { label: 'Nature', keywords: 'lush forest with natural daylight' },
+    { label: 'Cyberpunk', keywords: 'cyberpunk city with neon lights at night' },
 ]
 
 export default function AiGenerateSection() {
@@ -148,7 +148,7 @@ export default function AiGenerateSection() {
     return (
         <section>
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                ✨ AI Generate {!canUseAi && '💎 PRO FEATURE'}
+                AI Generate {!canUseAi && 'PRO FEATURE'}
             </h3>
 
             {!canUseAi ? (
@@ -206,11 +206,11 @@ export default function AiGenerateSection() {
                     {/* Credits Info */}
                     <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-800">
                         <div className="flex items-center gap-2 text-sm">
-                            <span className="text-zinc-400">💎 Cost:</span>
+                            <span className="text-zinc-400">Cost:</span>
                             <span className="text-white font-semibold">{AI_GENERATE_COST} credits</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
-                            <span className="text-zinc-400">💰 Balance:</span>
+                            <span className="text-zinc-400">Balance:</span>
                             <span className="text-white font-semibold">
                                 {totalCredits.toLocaleString()} credits
                             </span>

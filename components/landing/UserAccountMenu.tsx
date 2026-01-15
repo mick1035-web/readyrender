@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { useStore } from '@/store/useStore'
 import { User, Settings, LogOut, Crown, FolderOpen, ChevronDown, CreditCard } from 'lucide-react'
 import { PLANS } from '@/constants/plans'
@@ -82,9 +83,11 @@ export default function UserAccountMenu() {
                 className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 transition-all group"
             >
                 {user.photoURL ? (
-                    <img
+                    <Image
                         src={user.photoURL}
                         alt={user.displayName || 'User'}
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full"
                     />
                 ) : (
@@ -105,9 +108,11 @@ export default function UserAccountMenu() {
                     <div className="p-5 border-b border-white/10">
                         <div className="flex items-center gap-3">
                             {user.photoURL ? (
-                                <img
+                                <Image
                                     src={user.photoURL}
                                     alt={user.displayName || 'User'}
+                                    width={48}
+                                    height={48}
                                     className="w-12 h-12 rounded-full ring-2 ring-white/10"
                                 />
                             ) : (

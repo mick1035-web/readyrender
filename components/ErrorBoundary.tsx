@@ -58,7 +58,7 @@ export default class ErrorBoundary extends Component<Props, State> {
         if (this.state.hasError) {
             console.error('ErrorBoundary caught error:', this.state.error)
             console.error('Error info:', this.state.errorInfo)
-            console.warn('⚠️ Error occurred. Please reload the page if things stop working.')
+            console.warn('Error occurred. Please reload the page if things stop working.')
         }
 
         return this.props.children

@@ -11,7 +11,7 @@ const ModelRenderer = React.memo(function ModelRenderer() {
     const animationPreset = useStore((state) => state.animationPreset)
     const modelScale = useStore((state) => state.modelScale)
 
-    console.log('🔄 ModelRenderer re-rendered')
+    console.log('ModelRenderer re-rendered')
 
     if (!modelUrl) return null
 

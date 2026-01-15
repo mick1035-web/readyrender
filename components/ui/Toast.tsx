@@ -91,7 +91,7 @@ export default function Toast({
                 <button
                     onClick={() => onClose(id)}
                     className="flex-shrink-0 text-zinc-400 hover:text-white transition-colors"
-                    aria-label="關閉"
+                    aria-label="Close"
                 >
                     <X size={16} />
                 </button>
@@ -115,8 +115,8 @@ export default function Toast({
                                 onClose(id)
                             }}
                             className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${action.variant === 'primary'
-                                    ? `${style.text} bg-white/10 hover:bg-white/20`
-                                    : 'text-zinc-300 hover:text-white hover:bg-white/5'
+                                ? `${style.text} bg-white/10 hover:bg-white/20`
+                                : 'text-zinc-300 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             {action.label}

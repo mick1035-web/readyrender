@@ -6,11 +6,12 @@ import { db } from '@/lib/firebase'
 import { collection, query, where, getDocs, addDoc, deleteDoc, updateDoc, doc, orderBy, serverTimestamp } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Video, Clock, FolderOpen } from 'lucide-react'
+import Image from 'next/image'
 import Header from '@/components/common/Header'
 import Button from '@/components/ui/Button'
 import Card, { CardBody } from '@/components/ui/Card'
 import UpgradeDialog from '@/components/ui/UpgradeDialog'
-import TutorialOverlay from '@/components/tutorial/TutorialOverlay'
+import TutorialModal from '@/components/tutorial/TutorialModal'
 import { useStore } from '@/store/useStore'
 import { PLANS } from '@/constants/plans'
 
@@ -36,8 +37,8 @@ export default function Dashboard() {
     const currentPlan = PLANS[subscription.userTier]
 
     // 教學狀態
-    const { completed, skipped } = useStore(s => s.tutorial)
-    const startTutorial = useStore(s => s.startTutorial)
+    const checkAndShowTip = useStore(s => s.checkAndShowTip)
+    const markActionComplete = useStore(s => s.markActionComplete)
 
     useEffect(() => {
         if (!user) {
@@ -58,7 +59,7 @@ export default function Dashboard() {
                     ...doc.data()
                 })) as Project[]
 
-                console.log('📊 Dashboard projects:', projectList.map(p => ({ id: p.id, name: p.name, thumbnail: p.thumbnail })))
+                console.log('Dashboard projects:', projectList.map(p => ({ id: p.id, name: p.name, thumbnail: p.thumbnail })))
 
                 setProjects(projectList)
             } catch (error) {
@@ -75,15 +76,12 @@ export default function Dashboard() {
     useEffect(() => {
         if (!user || loading) return
 
-        // 檢查是否首次訪問
-        if (!completed && !skipped) {
-            // 延遲 1 秒後啟動教學
-            const timer = setTimeout(() => {
-                startTutorial()
-            }, 1000)
-            return () => clearTimeout(timer)
-        }
-    }, [user, loading, completed, skipped, startTutorial])
+        // 延遲 1 秒後顯示歡迎提示
+        const timer = setTimeout(() => {
+            checkAndShowTip('dashboard_load')
+        }, 1000)
+        return () => clearTimeout(timer)
+    }, [user, loading, checkAndShowTip])
 
     const createNewProject = async () => {
         if (!user) return
@@ -104,6 +102,7 @@ export default function Dashboard() {
             }
 
             const docRef = await addDoc(collection(db, "projects"), newProject)
+            markActionComplete('first_project_create')
             router.push(`/editor/${docRef.id}`)
         } catch (error) {
             console.error("Error creating project:", error)
@@ -170,7 +169,7 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-900">
-            <TutorialOverlay />
+            <TutorialModal />
             <Header />
 
             <main className="container mx-auto px-6 py-12">
@@ -229,10 +228,11 @@ export default function Dashboard() {
                                             onClick={() => router.push(`/editor/${project.id}`)}
                                         >
                                             {project.thumbnail ? (
-                                                <img
+                                                <Image
                                                     src={project.thumbnail}
                                                     alt={project.name}
-                                                    className="w-full h-full object-cover"
+                                                    fill
+                                                    className="object-cover"
                                                     onLoad={() => console.log('✅ Image loaded:', project.name)}
                                                     onError={(e) => console.error('❌ Image error:', project.name, project.thumbnail)}
                                                 />

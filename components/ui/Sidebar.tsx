@@ -11,10 +11,12 @@ import { db } from '@/lib/firebase'
 import { PLANS } from '@/constants/plans'
 import UpgradeDialog from '@/components/ui/UpgradeDialog'
 import HdriManager from '@/components/ui/HdriManager'
+import ExportConfirmDialog from '@/components/ui/ExportConfirmDialog'
 import { useToast } from '@/contexts/ToastContext'
 import { errorHandler } from '@/lib/errorHandler'
 import { ErrorType } from '@/types/errors'
 import { validateFile } from '@/lib/fileValidation'
+import { calculateExportCost } from '@/constants/export-costs'
 
 export default function Sidebar() {
     // Model State
@@ -48,6 +50,8 @@ export default function Sidebar() {
     const keyframes = useStore((state) => state.keyframes)
 
     const setAutoGenPopupStep = useStore(s => s.setAutoGenPopupStep)
+    const checkAndShowTip = useStore(s => s.checkAndShowTip)
+    const markActionComplete = useStore(s => s.markActionComplete)
 
     const { user } = useAuth()
     const { showToast } = useToast()
@@ -68,6 +72,7 @@ export default function Sidebar() {
     const [uploadedHdrFileName, setUploadedHdrFileName] = useState<string | null>(null)
     const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
     const [upgradeFeature, setUpgradeFeature] = useState('')
+    const [showExportConfirmDialog, setShowExportConfirmDialog] = useState(false)
 
     // Subscription state
     const subscription = useStore((state) => state.subscription)
@@ -83,7 +88,7 @@ export default function Sidebar() {
             // Give the model time to load and render (2 seconds)
             const timer = setTimeout(() => {
                 setIsModelLoading(false)
-                console.log('✅ Model loaded and rendered')
+                console.log('Model loaded and rendered')
 
                 // Trigger auto-gen popup AFTER model is fully loaded
                 // Using store method directly to avoid dependency issues
@@ -100,7 +105,7 @@ export default function Sidebar() {
             // Give the HDRI time to load and render (2 seconds)
             const timer = setTimeout(() => {
                 setIsHdrLoading(false)
-                console.log('✅ HDRI loaded and rendered')
+                console.log('HDRI loaded and rendered')
             }, 2000)
 
             return () => clearTimeout(timer)
@@ -220,6 +225,7 @@ export default function Sidebar() {
             else if (fileName.endsWith('.fbx')) type = 'fbx'
 
             setModelUrl(url, type)
+            markActionComplete('model_uploaded')
             errorHandler.success('Model uploaded successfully!')
 
             // Keep upload progress visible until model loads
@@ -495,7 +501,7 @@ export default function Sidebar() {
                         {/* Model Active Status */}
                         {modelUrl && !isModelLoading && (
                             <div className="px-3 py-2 bg-blue-900/30 border border-blue-700 rounded-md text-xs text-blue-300 flex items-center justify-between">
-                                <span>✓ 3D Model Active</span>
+                                <span>3D Model Active</span>
                                 <button
                                     onClick={() => {
                                         setModelUrl('', 'gltf')
@@ -584,7 +590,10 @@ export default function Sidebar() {
                     </div>
 
                     <button
-                        onClick={() => useStore.getState().setIsHdriManagerOpen(true)}
+                        onClick={() => {
+                            useStore.getState().setIsHdriManagerOpen(true)
+                            checkAndShowTip('first_hdri_change')
+                        }}
                         data-tutorial="hdri-presets"
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
@@ -717,15 +726,45 @@ export default function Sidebar() {
                         </div>
                     </div>
 
+                    <div className="space-y-1">
+                        <label className="text-xs text-zinc-400">Video Format</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { id: 'mp4', label: 'MP4' },
+                                { id: 'hevc', label: 'HEVC' }
+                            ].map((f) => (
+                                <button
+                                    key={f.id}
+                                    onClick={() => setExportSettings({ format: f.id as any })}
+                                    className={`text-xs py-1.5 rounded border transition-colors ${exportSettings.format === f.id
+                                        ? 'bg-blue-600 border-blue-500 text-white'
+                                        : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-zinc-700'
+                                        }`}
+                                >
+                                    {f.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Export Format Info */}
                     <div className="text-xs text-zinc-400 bg-zinc-800/50 p-3 rounded-lg space-y-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-white">MP4 (.mp4)</span>
-                            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">
-                                H.264
+                            <span className="font-semibold text-white">
+                                {exportSettings.format === 'mp4' ? 'MP4 (.mp4)' : 'HEVC (.mov)'}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded text-xs ${exportSettings.format === 'mp4'
+                                ? 'bg-blue-500/20 text-blue-400'
+                                : 'bg-purple-500/20 text-purple-400'
+                                }`}>
+                                {exportSettings.format === 'mp4' ? 'H.264' : 'H.265'}
                             </span>
                         </div>
-                        <p>Universal compatibility: YouTube, TikTok, Instagram, Amazon ...</p>
+                        <p>
+                            {exportSettings.format === 'mp4'
+                                ? 'Universal compatibility: YouTube, TikTok, Instagram ...'
+                                : 'Supports transparency: Safari, iOS, Final Cut Pro ...'}
+                        </p>
                         {keyframes.length > 0 && (
                             <p className="text-blue-400">
                                 The export is expected to take {estimatedTime} seconds.
@@ -735,7 +774,17 @@ export default function Sidebar() {
                 </div>
 
                 <button
-                    onClick={() => setIsRendering(true)}
+                    onClick={() => {
+                        // Calculate total duration from keyframes
+                        const totalDuration = keyframes.reduce((sum, kf) => sum + kf.duration, 0)
+                        if (totalDuration === 0) {
+                            errorHandler.warning('No keyframes to render!', 'Please add at least one keyframe first.')
+                            return
+                        }
+                        // Show export confirmation dialog
+                        checkAndShowTip('first_export')
+                        setShowExportConfirmDialog(true)
+                    }}
                     disabled={isRendering || !modelUrl}
                     data-tutorial="export-button"
                     className={`w-full flex items-center justify-center gap-2 px-4 py-3 font-bold rounded-lg transition-all duration-200 shadow-lg ${isRendering
@@ -774,6 +823,16 @@ export default function Sidebar() {
 
             {/* HDRI Manager */}
             <HdriManager />
+
+            {/* Export Confirmation Dialog */}
+            <ExportConfirmDialog
+                isOpen={showExportConfirmDialog}
+                onClose={() => setShowExportConfirmDialog(false)}
+                onConfirm={() => setIsRendering(true)}
+                duration={keyframes.reduce((sum, kf) => sum + kf.duration, 0)}
+                quality={exportSettings.quality}
+                currentCredits={subscription.subscriptionCredits + subscription.purchasedCredits}
+            />
         </aside >
     )
 }

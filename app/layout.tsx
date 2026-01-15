@@ -105,14 +105,14 @@ export default function RootLayout({
         <SentryInit />
         {/* [NEW] 包裹 AuthProvider，讓全站都能取得登入狀態 */}
         <ErrorBoundary>
-          <AuthProvider>
-            <ToastProvider>
+          <ToastProvider>
+            <AuthProvider>
               <NetworkStatusBanner />
               {children}
               {/* AI Environment Generation Loading Overlay */}
               <AiGeneratingOverlay />
-            </ToastProvider>
-          </AuthProvider>
+            </AuthProvider>
+          </ToastProvider>
         </ErrorBoundary>
       </body>
     </html>

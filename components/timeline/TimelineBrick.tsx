@@ -29,6 +29,7 @@ export default function TimelineBrick({ keyframe, index }: Props) {
     const clearKeyframeCamera = useStore(s => s.clearKeyframeCamera)
     const setEditingTextId = useStore(s => s.setEditingTextId)
     const setEditingImageId = useStore(s => s.setEditingImageId) // [NEW]
+    const checkAndShowTip = useStore(s => s.checkAndShowTip)
 
     // Helper to check config
     const hasText = keyframe.textConfig && keyframe.textConfig.visible && keyframe.textConfig.content
@@ -103,7 +104,9 @@ export default function TimelineBrick({ keyframe, index }: Props) {
                     onClick={(e) => {
                         e.stopPropagation()
                         setEditingTextId(keyframe.id)
+                        checkAndShowTip('first_text_add')
                     }}
+                    data-tutorial="text-button"
                     className={`w-full flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors truncate ${hasText
                         ? 'bg-pink-900/40 border-pink-500/50 text-pink-200 hover:bg-pink-900/60'
                         : 'bg-zinc-700/50 border-transparent text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300'
@@ -118,7 +121,9 @@ export default function TimelineBrick({ keyframe, index }: Props) {
                     onClick={(e) => {
                         e.stopPropagation()
                         setEditingImageId(keyframe.id)
+                        checkAndShowTip('first_image_add')
                     }}
+                    data-tutorial="image-button"
                     className={`w-full flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors truncate ${hasImage
                         ? 'bg-green-900/40 border-green-500/50 text-green-200 hover:bg-green-900/60'
                         : 'bg-zinc-700/50 border-transparent text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300'

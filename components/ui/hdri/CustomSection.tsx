@@ -88,7 +88,7 @@ export default function CustomSection() {
         <section>
             <div className="flex items-center justify-between mb-3 px-1">
                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
-                    📚 My HDRI Library ({customHdris.length})
+                    My HDRI Library ({customHdris.length})
                 </h3>
             </div>
 
@@ -113,7 +113,7 @@ export default function CustomSection() {
                                 {/* Type Icon */}
                                 <div className={`w-10 h-10 rounded flex items-center justify-center text-xl ${isUpload ? 'bg-blue-900/20 text-blue-400' : 'bg-purple-900/20 text-purple-400'
                                     }`}>
-                                    {isUpload ? '📤' : '🤖'}
+                                    {isUpload ? 'Upload' : 'AI'}
                                 </div>
 
                                 {/* Info */}

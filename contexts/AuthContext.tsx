@@ -11,6 +11,7 @@ import { subscribeToUserHdris } from '@/lib/hdriService'
 import { errorHandler } from '@/lib/errorHandler'
 import { ErrorType } from '@/types/errors'
 import * as Sentry from '@sentry/nextjs'
+import { useToast } from '@/contexts/ToastContext'
 
 interface AuthContextType {
     user: User | null
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState(true)
     const router = useRouter()
+    const { showToast } = useToast()
 
     // [FIX] 修正：使用正確的 action 名稱 'setCreditsData'
     const setUserTier = useStore(s => s.setUserTier)
@@ -50,19 +52,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (currentUser) {
                 const userDocRef = doc(db, "users", currentUser.uid)
 
-                // 1. 檢查資料是否存在，若無則建立預設免費檔案
+                // 1. 檢查資料是否存在，若無則建立預設 PRO 檔案 (BETA 測試期間)
                 try {
                     const docSnap = await getDoc(userDocRef)
-                    if (!docSnap.exists()) {
+                    const isNewUser = !docSnap.exists()
+
+                    if (isNewUser) {
+                        // BETA 測試期間：所有新用戶預設為 PRO 方案
                         await setDoc(userDocRef, {
                             email: currentUser.email,
-                            tier: 'FREE',
-                            subscriptionCredits: 200,
+                            tier: 'PRO',
+                            subscriptionCredits: 2000,
                             purchasedCredits: 0,
-                            maxProjects: 1,
+                            maxProjects: 12,
                             createdAt: new Date(),
-                            uid: currentUser.uid
+                            uid: currentUser.uid,
+                            isBetaTester: true // 標記為測試用戶
                         })
+
+                        // Reset tutorial for new users
+                        if (typeof window !== 'undefined') {
+                            localStorage.removeItem('tutorial_completed')
+                            localStorage.removeItem('tutorial_skipped')
+                            localStorage.removeItem('tutorial_step')
+                            localStorage.removeItem('tutorial_started')
+                        }
+
+                        // Display BETA testing notifications
+                        setTimeout(() => {
+                            showToast({
+                                type: 'info',
+                                message: '🎉 Welcome to ReadyRender BETA!',
+                                duration: 8000
+                            })
+
+                            setTimeout(() => {
+                                showToast({
+                                    type: 'warning',
+                                    message: '⚠️ Beta Testing Notice: All accounts and content will be deleted after the testing period. Please do not upload important data.',
+                                    duration: 10000
+                                })
+                            }, 1000)
+                        }, 2000)
                     }
 
                     // 2. 開啟即時監聽 (Real-time Listener) - User Profile

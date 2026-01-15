@@ -10,12 +10,10 @@ export default function ConversionProgress({ progress, stage, format }: Conversi
     const formatInfo = {
         mp4: {
             name: 'MP4 (H.264)',
-            icon: '🎬',
             color: 'blue'
         },
         hevc: {
             name: 'HEVC (H.265)',
-            icon: '✨',
             color: 'purple'
         }
     }
@@ -25,7 +23,6 @@ export default function ConversionProgress({ progress, stage, format }: Conversi
     return (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 backdrop-blur-sm">
             <div className="bg-zinc-900 p-8 rounded-2xl max-w-md w-full border border-zinc-800 shadow-2xl">
-                <div className="text-5xl mb-6 text-center animate-pulse">{info.icon}</div>
 
                 <h3 className="text-xl font-bold mb-2 text-center">
                     {stage === 'loading' ? 'Loading FFmpeg...' : `Converting to ${info.name}...`}
@@ -44,7 +41,7 @@ export default function ConversionProgress({ progress, stage, format }: Conversi
 
                 <div className="text-xs text-zinc-500 space-y-2 bg-zinc-800/50 p-4 rounded-lg">
                     <p className="text-center font-semibold text-zinc-400">
-                        ⏳ Please keep this tab open...
+                        Please keep this tab open...
                     </p>
                     {stage === 'converting' && (
                         <p className="text-center text-yellow-500">

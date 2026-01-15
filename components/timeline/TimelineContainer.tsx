@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useStore } from '@/store/useStore'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
 import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
@@ -18,6 +19,7 @@ export default function TimelineContainer() {
     const setIsPlaying = useStore(s => s.setIsPlaying)
     const setCaptureSignal = useStore(s => s.setCaptureSignal)
     const setIsTemplateManagerOpen = useStore(s => s.setIsTemplateManagerOpen)
+    const checkAndShowTip = useStore(s => s.checkAndShowTip)
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -32,6 +34,13 @@ export default function TimelineContainer() {
             reorderKeyframes(arrayMove(keyframes, oldIndex, newIndex))
         }
     }
+
+    // 自動開啟提示
+    useEffect(() => {
+        if (isOpen) {
+            checkAndShowTip('timeline_open')
+        }
+    }, [isOpen, checkAndShowTip])
 
     if (!isOpen) return null
 
@@ -50,6 +59,7 @@ export default function TimelineContainer() {
 
                         <button
                             onClick={() => setCaptureSignal('start')}
+                            data-tutorial="add-keyframe"
                             className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold"
                         >
                             <Camera size={14} />
@@ -69,6 +79,7 @@ export default function TimelineContainer() {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setIsPlaying(!isPlaying)}
+                            data-tutorial="play-button"
                             className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-colors ${isPlaying ? 'bg-red-600 text-white' : 'bg-green-600 text-white hover:bg-green-500'
                                 }`}
                         >

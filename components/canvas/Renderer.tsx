@@ -10,6 +10,7 @@ import { ffmpegService } from '@/lib/ffmpeg'
 import { useToast } from '@/contexts/ToastContext'
 import { errorHandler } from '@/lib/errorHandler'
 import { ErrorType } from '@/types/errors'
+import { calculateExportCost } from '@/constants/export-costs'
 
 interface Props {
     controlsRef: React.MutableRefObject<any>
@@ -25,6 +26,7 @@ export default function Renderer({ controlsRef }: Props) {
     const setIsRendering = useStore(s => s.setIsRendering)
     const exportSettings = useStore(s => s.exportSettings)
     const keyframes = useStore(s => s.keyframes)
+    const deductCredits = useStore(s => s.deductCredits)
 
     // Conversion state from store
     const setIsConverting = useStore(s => s.setIsConverting)
@@ -372,7 +374,7 @@ export default function Renderer({ controlsRef }: Props) {
             const { buffer } = muxer.target as ArrayBufferTarget
             const webmBlob = new Blob([buffer], { type: 'video/webm' })
 
-            console.log('✅ WebM generation complete')
+            console.log('WebM generation complete')
 
             // 9. Convert to MP4 using FFmpeg
             try {
@@ -388,30 +390,62 @@ export default function Renderer({ controlsRef }: Props) {
                 setConversionStage('converting')
                 setConversionProgress(0)
 
-                // Convert to MP4 (H.264)
-                console.log('🎬 Converting to MP4...')
-                const mp4Blob = await ffmpegService.convertToMP4(webmBlob, (progress) => {
-                    setConversionProgress(progress)
-                })
+                // Convert based on format setting
+                console.log(`Converting to ${exportSettings.format.toUpperCase()}...`)
+                const convertedBlob = exportSettings.format === 'hevc'
+                    ? await ffmpegService.convertToHEVC(webmBlob, (progress) => {
+                        setConversionProgress(progress)
+                    })
+                    : await ffmpegService.convertToMP4(webmBlob, (progress) => {
+                        setConversionProgress(progress)
+                    })
 
-                const filename = `render_${exportSettings.quality}.mp4`
+                const extension = exportSettings.format === 'hevc' ? 'mov' : 'mp4'
+                const filename = `render_${exportSettings.quality}.${extension}`
 
                 // Download final video
-                const url = URL.createObjectURL(mp4Blob)
+                const url = URL.createObjectURL(convertedBlob)
                 const a = document.createElement('a')
                 a.href = url
                 a.download = filename
                 a.click()
                 URL.revokeObjectURL(url)
 
-                console.log('✅ Conversion complete!')
+                console.log('Conversion complete!')
+
+                // Deduct credits after successful export
+                const totalDuration = keyframes.reduce((sum, kf) => sum + kf.duration, 0)
+                const creditsRequired = calculateExportCost(totalDuration, exportSettings.quality)
+                const success = deductCredits(creditsRequired)
+
+                if (success) {
+                    showToast({
+                        type: 'success',
+                        message: `Video exported successfully! ${creditsRequired} credits deducted.`,
+                        duration: 5000
+                    })
+                } else {
+                    // This shouldn't happen as we check before export, but just in case
+                    console.error('Failed to deduct credits after export')
+                }
 
             } catch (error) {
-                console.error('❌ Conversion failed:', error)
-                errorHandler.warning(
-                    '視頻轉換失敗，將下載 WebM 格式。',
-                    '您可以使用線上工具將 WebM 轉換為 MP4。'
-                )
+                console.error('Conversion failed:', error)
+
+                const errorMessage = error instanceof Error ? error.message : String(error)
+
+                // Check if it's a network/loading error
+                if (errorMessage.includes('fetch') || errorMessage.includes('load') || errorMessage.includes('network')) {
+                    errorHandler.warning(
+                        'FFmpeg loading failed, downloading WebM format instead.',
+                        'This may be due to network connectivity issues. WebM format plays in most modern browsers, or you can use online tools to convert to MP4.'
+                    )
+                } else {
+                    errorHandler.warning(
+                        'Video conversion failed, downloading WebM format instead.',
+                        'You can use online tools to convert WebM to MP4.'
+                    )
+                }
 
                 // Fallback: Download WebM
                 const url = URL.createObjectURL(webmBlob)
@@ -420,6 +454,19 @@ export default function Renderer({ controlsRef }: Props) {
                 a.download = `render_${exportSettings.quality}.webm`
                 a.click()
                 URL.revokeObjectURL(url)
+
+                // Still deduct credits for WebM export
+                const totalDuration = keyframes.reduce((sum, kf) => sum + kf.duration, 0)
+                const creditsRequired = calculateExportCost(totalDuration, exportSettings.quality)
+                const success = deductCredits(creditsRequired)
+
+                if (success) {
+                    showToast({
+                        type: 'info',
+                        message: `WebM exported successfully! ${creditsRequired} credits deducted.`,
+                        duration: 5000
+                    })
+                }
             } finally {
                 setIsConverting(false)
             }

@@ -17,14 +17,14 @@ export default function NoneSection() {
     return (
         <section>
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                🚫 No Environment
+                No Environment
             </h3>
 
             <button
                 onClick={handleSelectNone}
                 className={`relative w-full p-4 rounded-lg border transition-all text-left ${isActive
-                        ? 'bg-green-900/20 border-green-500/50'
-                        : 'bg-zinc-800 border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700'
+                    ? 'bg-green-900/20 border-green-500/50'
+                    : 'bg-zinc-800 border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700'
                     }`}
             >
                 {/* Checkmark */}

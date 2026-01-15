@@ -20,7 +20,7 @@ export default function PresetSection() {
     return (
         <section>
             <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                📚 Preset Library
+                Preset Library
             </h3>
 
             {/* Dropdown Select */}
