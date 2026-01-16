@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { Video, Sparkles, ArrowRight, Zap, Layers, Wand2 } from 'lucide-react'
+import Image from 'next/image'
 import TypewriterText from '@/components/landing/TypewriterText'
 import Interactive3DShowcase from '@/components/landing/Interactive3DShowcase'
 import UserAccountMenu from '@/components/landing/UserAccountMenu'
@@ -20,8 +21,15 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Video size={24} className="text-white" />
+              <div className="w-10 h-10 relative flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="ReadyRender Logo"
+                  width={120}
+                  height={120}
+                  className="object-contain max-w-none"
+                  priority
+                />
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold tracking-tight">ReadyRender</span>
@@ -225,8 +233,14 @@ export default function HomePage() {
             {/* Company Info */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <Video size={24} className="text-white" />
+                <div className="w-8 h-8 relative">
+                  <Image
+                    src="/logo.png"
+                    alt="ReadyRender Logo"
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                  />
                 </div>
                 <span className="text-xl font-bold">ReadyRender</span>
               </div>

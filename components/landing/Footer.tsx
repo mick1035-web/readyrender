@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Video, Github, Twitter, Linkedin, Youtube } from 'lucide-react'
 
 export default function Footer() {
@@ -12,8 +13,14 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="md:col-span-1">
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                <Video size={18} className="text-white" />
+                            <div className="w-8 h-8 relative">
+                                <Image
+                                    src="/logo.png"
+                                    alt="ReadyRender Logo"
+                                    width={32}
+                                    height={32}
+                                    className="object-contain"
+                                />
                             </div>
                             <span className="text-lg font-bold text-white">ReadyRender</span>
                         </div>

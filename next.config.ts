@@ -90,15 +90,14 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
           },
-          // Cross-Origin Isolation (Required for SharedArrayBuffer/FFmpeg)
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'credentialless'
-          },
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups'
-          },
+          // {
+          //   key: 'Cross-Origin-Embedder-Policy',
+          //   value: 'credentialless'
+          // },
+          // {
+          //   key: 'Cross-Origin-Opener-Policy',
+          //   value: 'same-origin-allow-popups'
+          // },
           // Strict Transport Security (HTTPS only)
           {
             key: 'Strict-Transport-Security',

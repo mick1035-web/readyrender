@@ -6,6 +6,8 @@ import { Video, Home, FolderOpen } from 'lucide-react'
 import UserAccountMenu from '@/components/landing/UserAccountMenu'
 import Button from '@/components/ui/Button'
 
+import Image from 'next/image'
+
 export default function Header() {
     const { user, signInWithGoogle } = useAuth()
     const router = useRouter()
@@ -22,8 +24,15 @@ export default function Header() {
                         onClick={() => router.push('/')}
                         className="flex items-center gap-3 group"
                     >
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-blue-500/50 transition-shadow">
-                            <Video size={24} className="text-white" />
+                        <div className="w-10 h-10 relative flex items-center justify-center transition-transform hover:scale-105">
+                            <Image
+                                src="/logo.png"
+                                alt="ReadyRender Logo"
+                                width={120}
+                                height={120}
+                                className="object-contain max-w-none"
+                                priority
+                            />
                         </div>
                         <span className="text-2xl font-bold tracking-tight text-white">
                             ReadyRender
