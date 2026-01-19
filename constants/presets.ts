@@ -259,5 +259,33 @@ export const CAMERA_PRESETS: PresetData[] = [
             },
             { duration: 2, cameraState: { position: [-4, 2, 4], target: [0, 0, 0] } } // Angle B
         ]
+    },
+    {
+        id: 'custom-1768545731996',
+        label: 'Z-clip',
+        description: '3 shots • Custom User Template',
+        keyframes: [
+            {
+                duration: 2,
+                cameraState: {
+                    position: [-2.0928563419194073, 6.692906522593654, 3.8503187675708137],
+                    target: [0, 0, 0]
+                }
+            },
+            {
+                duration: 2,
+                cameraState: {
+                    position: [1.6125054447437668, 0.9406206537836965, 2.17711667039536],
+                    target: [0, 0, 0]
+                }
+            },
+            {
+                duration: 2,
+                cameraState: {
+                    position: [-1.224275637090567, 0.27402629273735274, 1.694225746385236],
+                    target: [0, 0, 0]
+                }
+            }
+        ]
     }
 ]

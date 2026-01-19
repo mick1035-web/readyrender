@@ -35,6 +35,7 @@ export interface Keyframe {
     id: string
     cameraState?: CameraState
     duration: number
+    transitionDuration: number // [NEW] Time to travel FROM prev keyframe TO this one
     textConfig?: TextConfig
     imageConfig?: ImageConfig
 }
@@ -95,6 +96,7 @@ interface StoreState {
     keyframes: Keyframe[]
     addKeyframe: () => void
     updateKeyframeDuration: (id: string, duration: number) => void
+    updateKeyframeTransition: (id: string, duration: number) => void
     reorderKeyframes: (newOrder: Keyframe[]) => void
     removeKeyframe: (id: string) => void
 
@@ -329,6 +331,7 @@ export const useStore = create<StoreState>()(
                         const keyframe = {
                             id: `kf-${Date.now()}-${index}`,
                             duration: k.duration,
+                            transitionDuration: 2.5, // Default for presets
                             cameraState: k.cameraState,
                             textConfig: k.textConfig,
                             imageConfig
@@ -396,9 +399,17 @@ export const useStore = create<StoreState>()(
                     {
                         id: `kf-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
                         cameraState: undefined,
-                        duration: 2
+                        duration: 2,
+                        transitionDuration: 2.5 // Default transition gap
                     }
                 ]
+            })),
+
+            // [NEW] Action for resizing the gap
+            updateKeyframeTransition: (id: string, duration: number) => set((state) => ({
+                keyframes: state.keyframes.map((k) =>
+                    k.id === id ? { ...k, transitionDuration: Math.max(0.1, duration) } : k
+                )
             })),
 
             updateKeyframeDuration: (id, duration) => set((state) => ({

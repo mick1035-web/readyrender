@@ -85,48 +85,59 @@ export default function KeyframeController({ controlsRef }: Props) {
             }
 
             // Build Timeline Sequence
+            // Logic: Brick Length = Hold Time. Movement Time = Variable Gap.
+            // const TRANSITION_DURATION = 2.5 // Removed fixed constant
+
             for (let i = 0; i < keyframes.length; i++) {
                 const k = keyframes[i]
                 const nextK = keyframes[i + 1]
 
-                // Move Camera to NEXT keyframe
+                // 1. STAY (Hold) Phase
+                tl.to({}, { duration: k.duration })
+
+                // 2. MOVE (Transition) Phase - Use k.transitionDuration
+                // Note: The transition is "FROM k TO nextK", so we use k.transitionDuration? 
+                // Wait, if "Brick A" moves "Back and Forth", the gap is AFTER Brick A.
+                // So the gap value is on 'k'.
+                // Ideally, 'k.transitionDuration' determines time to travel to 'nextK'.
+
+                const transitionTime = k.transitionDuration || 2.5
+
                 if (nextK && nextK.cameraState) {
+                    // Animate Camera Position
                     tl.to(camera.position, {
                         x: nextK.cameraState.position[0],
                         y: nextK.cameraState.position[1],
                         z: nextK.cameraState.position[2],
-                        duration: k.duration,
+                        duration: transitionTime,
                         ease: "power2.inOut"
-                    }, "<")
+                    })
 
+                    // Animate Controls Target
                     tl.to(controlsRef.current.target, {
                         x: nextK.cameraState.target[0],
                         y: nextK.cameraState.target[1],
                         z: nextK.cameraState.target[2],
-                        duration: k.duration,
+                        duration: transitionTime,
                         ease: "power2.inOut",
                         onUpdate: () => { if (controlsRef.current) controlsRef.current.update() }
                     }, "<")
+
+                    // 3. ARRIVAL
+                    tl.call(() => {
+                        if (nextK.textConfig?.visible) {
+                            useStore.getState().setTextConfig(nextK.textConfig)
+                        } else {
+                            useStore.getState().setTextConfig({ visible: false } as any)
+                        }
+
+                        if (nextK.imageConfig?.visible) {
+                            useStore.getState().setImageConfig(nextK.imageConfig)
+                        } else {
+                            useStore.getState().setImageConfig({ visible: false } as any)
+                        }
+                    })
                 }
-
-                // Schedule Text & Image Updates for the NEXT keyframe (Cut transition)
-                tl.call(() => {
-                    // Update Text
-                    if (nextK && nextK.textConfig?.visible) {
-                        useStore.getState().setTextConfig(nextK.textConfig)
-                    } else if (nextK) {
-                        useStore.getState().setTextConfig({ visible: false } as any)
-                    }
-
-                    // [NEW] Update Image
-                    if (nextK && nextK.imageConfig?.visible) {
-                        useStore.getState().setImageConfig(nextK.imageConfig)
-                    } else if (nextK) {
-                        useStore.getState().setImageConfig({ visible: false } as any)
-                    }
-                })
-
-                tl.to({}, { duration: k.duration })
             }
 
         } else if (!isPlaying) {

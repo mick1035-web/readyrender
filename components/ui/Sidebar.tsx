@@ -17,6 +17,7 @@ import { errorHandler } from '@/lib/errorHandler'
 import { ErrorType } from '@/types/errors'
 import { validateFile } from '@/lib/fileValidation'
 import { calculateExportCost } from '@/constants/export-costs'
+import ScanGuideModal from '@/components/ui/ScanGuideModal'
 
 export default function Sidebar() {
     // Model State
@@ -73,6 +74,7 @@ export default function Sidebar() {
     const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
     const [upgradeFeature, setUpgradeFeature] = useState('')
     const [showExportConfirmDialog, setShowExportConfirmDialog] = useState(false)
+    const [showScanGuide, setShowScanGuide] = useState(false)
 
     // Subscription state
     const subscription = useStore((state) => state.subscription)
@@ -435,7 +437,7 @@ export default function Sidebar() {
                     <p className="text-xs text-zinc-500 mb-3">
                         If your product does not have a 3D model, please{' '}
                         <button
-                            onClick={() => alert('More applications will be launched soon.')}
+                            onClick={() => setShowScanGuide(true)}
                             className="text-blue-400 hover:text-blue-300 underline transition-colors cursor-pointer bg-transparent border-none p-0"
                         >
                             click here
@@ -833,6 +835,8 @@ export default function Sidebar() {
                 quality={exportSettings.quality}
                 currentCredits={subscription.subscriptionCredits + subscription.purchasedCredits}
             />
+            {/* Modal */}
+            <ScanGuideModal isOpen={showScanGuide} onClose={() => setShowScanGuide(false)} />
         </aside >
     )
 }

@@ -251,6 +251,10 @@ export default function EditorPage() {
                 stylePreset: state.stylePreset,
                 animationPreset: state.animationPreset,
 
+                // [FIX] Save HDRI selection state
+                hdriMode: state.hdriMode,
+                activeHdriId: state.activeHdriId,
+
                 modelScale: state.modelScale,
                 modelPosition: state.modelPosition,
                 modelRotation: state.modelRotation,

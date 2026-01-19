@@ -2,7 +2,7 @@
 
 import { useStore } from '@/store/useStore'
 import { CAMERA_PRESETS } from '@/constants/presets'
-import { X, Save, Trash2, LayoutTemplate, Film, AlertTriangle } from 'lucide-react'
+import { X, Save, Trash2, LayoutTemplate, Film, AlertTriangle, Code } from 'lucide-react'
 import { useState } from 'react'
 
 type ConfirmAction = {
@@ -48,6 +48,20 @@ export default function TemplateManager() {
 
     const handleCancel = () => {
         setConfirmAction(null)
+    }
+
+    const handleCopyCode = (preset: any) => {
+        // Create a clean copy without internal IDs if we want to be strict, 
+        // but keeping it simple is fine. We mainly want keyframes.
+        const code = JSON.stringify({
+            id: preset.id, // Developer should change this
+            label: preset.label,
+            description: preset.description,
+            keyframes: preset.keyframes
+        }, null, 4)
+
+        navigator.clipboard.writeText(code)
+        alert('Configuration copied to clipboard! You can now paste it into constants/presets.ts')
     }
 
     return (
@@ -139,6 +153,14 @@ export default function TemplateManager() {
                                             className="p-2 text-zinc-600 hover:text-red-500 hover:bg-red-900/20 rounded transition-colors"
                                         >
                                             <Trash2 size={16} />
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleCopyCode(preset)}
+                                            className="p-2 text-zinc-600 hover:text-blue-500 hover:bg-blue-900/20 rounded transition-colors"
+                                            title="Copy Configuration (Developer)"
+                                        >
+                                            <Code size={16} />
                                         </button>
                                     </div>
                                 ))}
