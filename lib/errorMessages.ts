@@ -223,15 +223,15 @@ export const errorMessages: Record<ErrorType, (context?: ErrorContext) => ErrorI
     [ErrorType.AUTH_FAILED]: (context) => ({
         type: ErrorType.AUTH_FAILED,
         title: 'Login Failed',
-        description: 'Unable to complete login',
+        description: context?.details || 'Unable to complete login',
         solutions: [
             'Check your internet connection',
             'Clear browser cache and try again',
             'Use an alternative login method',
             'Contact support for assistance'
         ],
-        severity: 'critical',
-        duration: 0
+        severity: 'error',
+        duration: 8000
     }),
 
     [ErrorType.PERMISSION_DENIED]: (context) => ({

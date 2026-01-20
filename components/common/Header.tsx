@@ -8,10 +8,14 @@ import Button from '@/components/ui/Button'
 
 import Image from 'next/image'
 
+import { useState } from 'react'
+import LoginModal from '@/components/auth/LoginModal'
+
 export default function Header() {
-    const { user, signInWithGoogle } = useAuth()
+    const { user } = useAuth()
     const router = useRouter()
     const pathname = usePathname()
+    const [showLoginModal, setShowLoginModal] = useState(false)
 
     const isActive = (path: string) => pathname === path
 
@@ -83,13 +87,15 @@ export default function Header() {
                         {user ? (
                             <UserAccountMenu />
                         ) : (
-                            <Button onClick={signInWithGoogle} size="sm">
+                            <Button onClick={() => setShowLoginModal(true)} size="sm">
                                 Sign In
                             </Button>
                         )}
                     </div>
                 </div>
             </div>
+
+            <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
         </header>
     )
 }

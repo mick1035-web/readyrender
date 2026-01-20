@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
         const prediction = await replicate.predictions.create({
             version: "d26037255a2b298408505e2fbd0bf7703521daca8f07e8c8f335ba874b4aa11a",
             input: {
-                prompt: prompt,
+                prompt: `seamless 360 panorama, equirectangular projection, ${prompt}`, // Force seamless properties
                 negative_prompt: negativePrompt,
-                width: 1440,      // Maximum supported by model
+                width: 1440,      // Maximum supported by model (confirmed via API error)
                 height: 720,      // 2:1 aspect ratio for 360 panorama
                 num_inference_steps: 50,  // Maximum steps for finest quality
                 guidance_scale: 3.5,      // Standard guidance

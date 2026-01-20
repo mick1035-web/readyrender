@@ -8,9 +8,13 @@ import TypewriterText from '@/components/landing/TypewriterText'
 import Interactive3DShowcase from '@/components/landing/Interactive3DShowcase'
 import UserAccountMenu from '@/components/landing/UserAccountMenu'
 
+import { useState } from 'react'
+import LoginModal from '@/components/auth/LoginModal'
+
 export default function HomePage() {
-  const { user, signInWithGoogle } = useAuth()
+  const { user } = useAuth()
   const router = useRouter()
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white">
@@ -40,7 +44,16 @@ export default function HomePage() {
             </div>
 
             {/* User Account Menu */}
-            <UserAccountMenu />
+            {user ? (
+              <UserAccountMenu />
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full font-semibold transition-all backdrop-blur-sm border border-white/10"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -86,10 +99,10 @@ export default function HomePage() {
                   </button>
                 ) : (
                   <button
-                    onClick={signInWithGoogle}
+                    onClick={() => setShowLoginModal(true)}
                     className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-full font-bold text-lg hover:bg-zinc-100 transition-all shadow-2xl hover:shadow-blue-500/50 hover:scale-105"
                   >
-                    <span>Get Started with Google</span>
+                    <span>Get Started - It's Free</span>
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 )}
@@ -303,7 +316,7 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>
   )
 }

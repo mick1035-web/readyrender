@@ -33,16 +33,9 @@ export default function UserAccountMenu() {
         }
     }, [isOpen])
 
-    // If not logged in, show sign-in button
+    // If not logged in, show nothing (parent should handle sign in button)
     if (!user) {
-        return (
-            <button
-                onClick={signInWithGoogle}
-                className="px-6 py-2.5 bg-white text-black rounded-full font-semibold hover:bg-zinc-100 transition-all shadow-lg hover:shadow-xl hover:scale-105"
-            >
-                Sign In
-            </button>
-        )
+        return null
     }
 
     const handleSignOut = async () => {

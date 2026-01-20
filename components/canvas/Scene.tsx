@@ -66,6 +66,11 @@ function CustomEnvironment({
                         loadedTexture.anisotropy = 16
                         loadedTexture.generateMipmaps = false
 
+                        // Fix Seam: Allow wrapping for smooth interpolation at edges
+                        loadedTexture.mapping = THREE.EquirectangularReflectionMapping
+                        loadedTexture.wrapS = THREE.RepeatWrapping
+                        loadedTexture.wrapT = THREE.ClampToEdgeWrapping
+
                         loadedTextureInstance = loadedTexture
                         setTexture(loadedTexture)
                         console.log('Successfully loaded environment texture:', envUrl)
@@ -118,7 +123,7 @@ function CustomEnvironment({
                 key={envUrl}
                 background={false}
                 blur={envBlur}
-                resolution={1024}
+                resolution={4096}
             >
                 <mesh>
                     <sphereGeometry args={[500, 64, 32]} />
@@ -237,7 +242,7 @@ export default function Scene() {
                             background={showEnvironmentBackground}
                             backgroundIntensity={isRendering ? 1.0 : envOpacity}
                             blur={envBlur}
-                            resolution={1024}
+                            resolution={4096}
                         />
                     ) : null}
                 </Suspense>

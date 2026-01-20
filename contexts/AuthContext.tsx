@@ -1,9 +1,9 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { onAuthStateChanged, User, signInWithPopup, signOut } from 'firebase/auth'
+import { onAuthStateChanged, User, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth'
 import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore'
-import { auth, googleProvider, db } from '@/lib/firebase'
+import { auth, googleProvider, facebookProvider, twitterProvider, db } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/store/useStore'
 import { PlanTier } from '@/constants/plans'
@@ -17,6 +17,11 @@ interface AuthContextType {
     user: User | null
     loading: boolean
     signInWithGoogle: () => Promise<void>
+    signInWithFacebook: () => Promise<void>
+    signInWithTwitter: () => Promise<void>
+    signInWithEmail: (email: string, password: string) => Promise<void>
+    signUpWithEmail: (email: string, password: string, name?: string) => Promise<void>
+    resetPassword: (email: string) => Promise<void>
     logout: () => Promise<void>
 }
 
@@ -67,7 +72,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                             maxProjects: 12,
                             createdAt: new Date(),
                             uid: currentUser.uid,
-                            isBetaTester: true // 標記為測試用戶
+                            isBetaTester: true, // 標記為測試用戶
+                            displayName: currentUser.displayName || '' // Save initial display name
                         })
 
                         // Reset tutorial for new users
@@ -114,6 +120,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                                     data.purchasedCredits || 0
                                 )
                             }
+                        }
+                    }, (error) => {
+                        // Ignore permission denied errors which happen on logout
+                        if (error.code !== 'permission-denied') {
+                            console.error("Error in user profile listener:", error)
                         }
                     })
 
@@ -187,6 +198,126 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    const signInWithFacebook = async () => {
+        try {
+            await signInWithPopup(auth, facebookProvider)
+            router.push('/dashboard')
+        } catch (error) {
+            console.error("Facebook Login failed", error)
+
+            const errorMessage = error instanceof Error ? error.message : String(error)
+
+            if (errorMessage.includes('account-exists-with-different-credential')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, {
+                    details: 'An account already exists with the same email address but different sign-in credentials. Sign in using a provider associated with this email address.'
+                })
+            } else if (errorMessage.includes('popup-closed') || errorMessage.includes('cancelled')) {
+                errorHandler.warning('Login cancelled', 'Please try logging in again')
+            } else if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+                errorHandler.handle(ErrorType.NETWORK_ERROR)
+            } else {
+                errorHandler.handle(ErrorType.AUTH_FAILED, {
+                    details: errorMessage
+                })
+            }
+        }
+    }
+
+    const signInWithTwitter = async () => {
+        try {
+            await signInWithPopup(auth, twitterProvider)
+            router.push('/dashboard')
+        } catch (error) {
+            console.error("Twitter Login failed", error)
+
+            const errorMessage = error instanceof Error ? error.message : String(error)
+
+            if (errorMessage.includes('account-exists-with-different-credential')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, {
+                    details: 'An account already exists with the same email. Please sign in with the original provider.'
+                })
+            } else if (errorMessage.includes('popup-closed') || errorMessage.includes('cancelled')) {
+                errorHandler.warning('Login cancelled', 'Please try logging in again')
+            } else if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+                errorHandler.handle(ErrorType.NETWORK_ERROR)
+            } else {
+                errorHandler.handle(ErrorType.AUTH_FAILED, {
+                    details: errorMessage
+                })
+            }
+        }
+    }
+
+    const signInWithEmail = async (email: string, password: string) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password)
+            router.push('/dashboard')
+        } catch (error) {
+            console.error("Email Login failed", error)
+            const errorMessage = error instanceof Error ? error.message : String(error)
+
+            if (errorMessage.includes('user-not-found') || errorMessage.includes('wrong-password') || errorMessage.includes('invalid-credential')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: 'Invalid email or password' })
+            } else if (errorMessage.includes('invalid-email')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: 'Invalid email address' })
+            } else {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: errorMessage })
+            }
+            throw error // Re-throw to let UI handle loading state if needed
+        }
+    }
+
+    const signUpWithEmail = async (email: string, password: string, name?: string) => {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+
+            // Name update
+            if (name) {
+                await updateProfile(userCredential.user, {
+                    displayName: name
+                })
+                // Trigger local state update if needed, though onAuthStateChanged usually handles it
+                // We'll rely on the snapshot listener or next refresh to pick it up fully, 
+                // but for immediate UI feedback we might verify user object.
+            }
+
+            router.push('/dashboard')
+        } catch (error) {
+            console.error("Email Sign Up failed", error)
+            const errorMessage = error instanceof Error ? error.message : String(error)
+
+            if (errorMessage.includes('email-already-in-use')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: 'Email already in use' })
+            } else if (errorMessage.includes('weak-password')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: 'Password should be at least 6 characters' })
+            } else if (errorMessage.includes('invalid-email')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: 'Invalid email address' })
+            } else {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: errorMessage })
+            }
+            throw error // Re-throw to let UI handle loading state
+        }
+    }
+
+    const resetPassword = async (email: string) => {
+        try {
+            await sendPasswordResetEmail(auth, email)
+            errorHandler.success('Password reset email sent!', 'Check your inbox for further instructions.')
+        } catch (error) {
+            console.error("Reset Password failed", error)
+            const errorMessage = error instanceof Error ? error.message : String(error)
+
+            if (errorMessage.includes('user-not-found')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: 'No user found with this email address.' })
+            } else if (errorMessage.includes('invalid-email')) {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: 'Invalid email address.' })
+            } else {
+                errorHandler.handle(ErrorType.AUTH_FAILED, { details: errorMessage })
+            }
+            throw error
+        }
+    }
+
     const logout = async () => {
         await signOut(auth)
         // 登出時重置 Store 狀態回預設值 (可選，這裡先不處理以免複雜化)
@@ -194,7 +325,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, signInWithGoogle, logout }}>
+        <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithFacebook, signInWithTwitter, signInWithEmail, signUpWithEmail, resetPassword, logout }}>
             {!loading && children}
         </AuthContext.Provider>
     )

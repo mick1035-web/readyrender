@@ -37,7 +37,17 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'www.google.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'replicate.delivery',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.twimg.com',
         pathname: '/**',
       },
     ],
@@ -58,7 +68,7 @@ const nextConfig: NextConfig = {
               "script-src-elem 'self' 'unsafe-eval' 'unsafe-inline' blob: https://www.gstatic.com https://apis.google.com https://unpkg.com",
               "worker-src 'self' blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' blob: data: https://firebasestorage.googleapis.com https://*.googleusercontent.com https://replicate.delivery",
+              "img-src 'self' blob: data: https://firebasestorage.googleapis.com https://*.googleusercontent.com https://www.google.com https://replicate.delivery https://*.twimg.com",
               "font-src 'self' https://fonts.gstatic.com",
               "connect-src 'self' blob: https://cdn.jsdelivr.net https://*.googleapis.com https://*.firebaseio.com https://firebasestorage.googleapis.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://raw.githack.com https://raw.githubusercontent.com https://*.sentry.io https://replicate.delivery https://unpkg.com",
               "media-src 'self' blob: https://firebasestorage.googleapis.com",

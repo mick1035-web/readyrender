@@ -11,12 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { errorHandler } from '@/lib/errorHandler'
 import { ErrorType } from '@/types/errors'
 
-const PRESET_PROMPTS = [
-    { label: 'Studio', keywords: 'modern photography studio with softbox lights' },
-    { label: 'Sunset', keywords: 'beautiful sunset with warm golden hour lighting' },
-    { label: 'Nature', keywords: 'lush forest with natural daylight' },
-    { label: 'Cyberpunk', keywords: 'cyberpunk city with neon lights at night' },
-]
+
 
 export default function AiGenerateSection() {
     const { user } = useAuth()
@@ -141,9 +136,7 @@ export default function AiGenerateSection() {
         }
     }
 
-    const appendPreset = (keywords: string) => {
-        setPrompt(prev => prev ? `${prev}, ${keywords}` : keywords)
-    }
+
 
     return (
         <section>
@@ -183,25 +176,13 @@ export default function AiGenerateSection() {
                         <textarea
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
-                            placeholder="sunset beach with palm trees and calm ocean waves..."
+                            placeholder="Describe the scene's spatial layout, specific location, and lighting atmosphere (e.g., time of day or light source), along with your desired visual style in detail"
                             disabled={isGeneratingEnv}
                             className="w-full h-24 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
 
-                    {/* Preset Chips */}
-                    <div className="flex flex-wrap gap-2">
-                        {PRESET_PROMPTS.map((preset) => (
-                            <button
-                                key={preset.label}
-                                onClick={() => appendPreset(preset.keywords)}
-                                disabled={isGeneratingEnv}
-                                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-full text-xs text-zinc-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {preset.label}
-                            </button>
-                        ))}
-                    </div>
+
 
                     {/* Credits Info */}
                     <div className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg border border-zinc-800">

@@ -80,7 +80,7 @@ export class ErrorHandler {
             title: errorInfo.title,
             message: errorInfo.description,
             description: errorInfo.solutions.length > 0
-                ? `解決方案：\n${errorInfo.solutions.map((s, i) => `${i + 1}. ${s}`).join('\n')}`
+                ? `Solution：\n${errorInfo.solutions.map((s, i) => `${i + 1}. ${s}`).join('\n')}`
                 : undefined,
             actions: customActions || errorInfo.actions,
             duration: errorInfo.duration
@@ -199,11 +199,12 @@ export class ErrorHandler {
     }
 
     // Success message helper
-    static success(message: string, duration: number = 5000) {
+    static success(message: string, description?: string, duration: number = 5000) {
         if (!this.showToast) return
         this.showToast({
             type: 'success',
             message,
+            description,
             duration
         })
     }
