@@ -57,14 +57,19 @@ export default function AiGenerateSection() {
                 throw new Error('Failed to enhance prompt')
             }
 
-            const { enhanced: enhancedPrompt } = await enhanceResponse.json()
+            const { prompt: enhancedPrompt, negativePrompt, parameters } = await enhanceResponse.json()
             console.log('Enhanced prompt:', enhancedPrompt)
+            console.log('Negative prompt:', negativePrompt)
 
             // Step 2: Generate environment with enhanced prompt
             const response = await fetch('/api/generate-env', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: enhancedPrompt })
+                body: JSON.stringify({
+                    prompt: enhancedPrompt,
+                    negativePrompt,
+                    parameters
+                })
             })
 
             if (!response.ok) {

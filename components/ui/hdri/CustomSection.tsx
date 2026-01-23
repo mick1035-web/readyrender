@@ -113,7 +113,7 @@ export default function CustomSection() {
                                 {/* Type Icon */}
                                 <div className={`w-10 h-10 rounded flex items-center justify-center text-xl ${isUpload ? 'bg-blue-900/20 text-blue-400' : 'bg-purple-900/20 text-purple-400'
                                     }`}>
-                                    {isUpload ? 'Upload' : 'AI'}
+                                    {isUpload ? <Upload size={20} /> : 'AI'}
                                 </div>
 
                                 {/* Info */}

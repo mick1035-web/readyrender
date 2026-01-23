@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useEffect, useState, useRef } from 'react'
-import { useLoader } from '@react-three/fiber'
+import { useLoader, useFrame } from '@react-three/fiber'
 import { useGLTF, Float, Center, Resize, Html } from '@react-three/drei'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
@@ -263,13 +263,27 @@ export default React.memo(function AnimationWrapper({ url, animation, modelType,
         </Center>
     )
 
+    // [NEW] Ref for animation
+    const animatedGroupRef = useRef<THREE.Group>(null)
+
+    // [NEW] Spin Animation Logic
+    useFrame((state, delta) => {
+        if (animatedGroupRef.current) {
+            if (animation === 'spin') {
+                animatedGroupRef.current.rotation.y += delta * 0.5 // Spin speed
+            } else if (animation === 'spin-reverse') {
+                animatedGroupRef.current.rotation.y -= delta * 0.5 // Reverse spin
+            }
+        }
+    })
+
     // 4. Apply Animation
     const AnimatedModel = animation === 'float' ? (
         <Float speed={2} rotationIntensity={0.5} floatIntensity={1} floatingRange={[0.2, 0.8]}>
             <group name="product-model">{ProcessedModel}</group>
         </Float>
     ) : (
-        <group name="product-model">{ProcessedModel}</group>
+        <group ref={animatedGroupRef} name="product-model">{ProcessedModel}</group>
     )
 
     // 5. Wrap in Draggable with optional warning

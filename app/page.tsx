@@ -138,6 +138,56 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Video Showcase Section */}
+      <section className="py-20 bg-zinc-900/50">
+        <div className="container mx-auto px-12">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              See It In Action
+            </h2>
+            <p className="text-xl text-zinc-400">
+              Watch how easy it is to create professional 3D videos
+            </p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            {/* Video Container */}
+            <div className="relative aspect-video bg-zinc-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+              <video
+                src="/demo-video.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Video Stats */}
+            <div className="grid grid-cols-3 gap-8 mt-12">
+              <div className="text-center">
+                <div className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
+                  10x
+                </div>
+                <div className="text-zinc-400">Faster Creation</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+                  4K
+                </div>
+                <div className="text-zinc-400">Quality Output</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2">
+                  100%
+                </div>
+                <div className="text-zinc-400">Cloud-Based</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 border-t border-white/10">
         <div className="container mx-auto px-12">
@@ -182,57 +232,6 @@ export default function HomePage() {
               <p className="text-zinc-400">
                 Download high-quality videos in multiple formats, ready for social media or marketing.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Video Showcase Section */}
-      <section className="py-20 bg-zinc-900/50">
-        <div className="container mx-auto px-12">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              See It In Action
-            </h2>
-            <p className="text-xl text-zinc-400">
-              Watch how easy it is to create professional 3D videos
-            </p>
-          </div>
-
-          <div className="max-w-5xl mx-auto">
-            {/* Video Container */}
-            <div className="relative aspect-video bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-3xl overflow-hidden border border-white/10">
-              <div className="absolute inset-0 flex items-center justify-center">
-                {/* Placeholder for demo video */}
-                <div className="text-center space-y-4">
-                  <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto backdrop-blur-sm">
-                    <Video size={40} className="text-white" />
-                  </div>
-                  <p className="text-zinc-400">Demo video coming soon</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Video Stats */}
-            <div className="grid grid-cols-3 gap-8 mt-12">
-              <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
-                  10x
-                </div>
-                <div className="text-zinc-400">Faster Creation</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent mb-2">
-                  4K
-                </div>
-                <div className="text-zinc-400">Quality Output</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-2">
-                  100%
-                </div>
-                <div className="text-zinc-400">Cloud-Based</div>
-              </div>
             </div>
           </div>
         </div>

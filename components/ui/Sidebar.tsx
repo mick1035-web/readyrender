@@ -1,11 +1,12 @@
 'use client'
 
 import { useStore } from '@/store/useStore'
-import { Box, Image, Upload, Video, Download, RotateCcw, Move, RotateCw, Edit2, Lock } from 'lucide-react'
+import { Box, Image, Upload, Video, Download, RotateCcw, Move, RotateCw, Edit2, Lock, RefreshCcw } from 'lucide-react'
 import { ChangeEvent, useRef, useState, useEffect } from 'react'
 import { uploadFile } from '@/lib/uploadFile'
 import { useAuth } from '@/contexts/AuthContext'
-import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { useParams, useRouter } from 'next/navigation'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { PLANS } from '@/constants/plans'
@@ -21,12 +22,15 @@ import ScanGuideModal from '@/components/ui/ScanGuideModal'
 
 export default function Sidebar() {
     // Model State
+    const router = useRouter()
     const modelUrl = useStore((state) => state.modelUrl)
     const setModelUrl = useStore((state) => state.setModelUrl)
     const modelScale = useStore((state) => state.modelScale)
     const setModelScale = useStore((state) => state.setModelScale)
     const setModelPosition = useStore((state) => state.setModelPosition)
     const setModelRotation = useStore((state) => state.setModelRotation)
+    const animationPreset = useStore((state) => state.animationPreset)
+    const setAnimationPreset = useStore((state) => state.setAnimationPreset)
 
     // Transform Mode (For Gizmo)
     const transformMode = useStore((state) => state.transformMode)
@@ -369,7 +373,7 @@ export default function Sidebar() {
     const estimatedTime = calculateEstimatedTime()
 
     return (
-        <aside className="w-[320px] h-screen bg-zinc-900 border-r border-zinc-800 flex flex-col overflow-y-auto">
+        <aside className="w-[320px] h-screen bg-zinc-900 border-r border-zinc-800 flex flex-col overflow-y-auto z-50 relative">
             <div className="p-6 border-b border-zinc-800">
                 <div className="group">
                     {isEditingTitle ? (
@@ -575,15 +579,41 @@ export default function Sidebar() {
                                         }}
                                     />
                                 </div>
+
+                                {/* Auto Rotate Toggle */}
+                                <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-xs text-zinc-400">Auto Rotate</label>
+                                        {(animationPreset === 'spin' || animationPreset === 'spin-reverse') && (
+                                            <button
+                                                onClick={() => setAnimationPreset(animationPreset === 'spin' ? 'spin-reverse' : 'spin')}
+                                                title="Reverse Direction"
+                                                className="p-1 text-zinc-500 hover:text-white transition-colors"
+                                            >
+                                                <RefreshCcw size={12} className={animationPreset === 'spin-reverse' ? 'text-blue-400' : ''} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => setAnimationPreset(animationPreset === 'none' ? 'spin' : 'none')}
+                                        className={`w-10 h-5 rounded-full relative transition-colors ${animationPreset === 'spin' || animationPreset === 'spin-reverse'
+                                            ? 'bg-blue-600'
+                                            : 'bg-zinc-700'
+                                            }`}
+                                    >
+                                        <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${(animationPreset === 'spin' || animationPreset === 'spin-reverse')
+                                            ? 'translate-x-5'
+                                            : 'translate-x-0'
+                                            }`} />
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
                 </section>
 
-
-
                 {/* Section 2: Environment */}
-                <section data-tutorial="hdri-section">
+                <section data-tutorial="hdri-section" className="border-b border-zinc-800 pb-6 mb-6">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <Image className="w-5 h-5 text-green-400" />
@@ -652,10 +682,10 @@ export default function Sidebar() {
                             />
                         </div>
                     </div>
-                </section>
+                </section >
 
                 {/* Section 3: Camera Motion */}
-                <section>
+                < section >
                     <div className="flex items-center gap-2 mb-4">
                         <Video className="w-5 h-5 text-orange-400" />
                         <h2 className="text-sm font-semibold text-zinc-300">3. Camera Motion</h2>
@@ -668,11 +698,13 @@ export default function Sidebar() {
                         <Video size={18} />
                         Set Keyframe
                     </button>
-                </section>
-            </div>
+                </section >
+
+
+            </div >
 
             {/* Export Section */}
-            <div className="p-6 border-t border-zinc-800 space-y-4">
+            < div className="p-6 border-t border-zinc-800 space-y-4" >
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-zinc-400">Export Settings</label>
 
@@ -812,12 +844,13 @@ export default function Sidebar() {
                 <p className="text-xs text-zinc-500 text-center">
                     Powered by Three.js & React
                 </p>
-            </div>
+            </div >
 
             {/* Upgrade Dialog */}
-            <UpgradeDialog
+            < UpgradeDialog
                 isOpen={showUpgradeDialog}
-                onClose={() => setShowUpgradeDialog(false)}
+                onClose={() => setShowUpgradeDialog(false)
+                }
                 currentTier={subscription.userTier}
                 feature={upgradeFeature}
                 requiredTier="PRO"
@@ -837,6 +870,6 @@ export default function Sidebar() {
             />
             {/* Modal */}
             <ScanGuideModal isOpen={showScanGuide} onClose={() => setShowScanGuide(false)} />
-        </aside >
+        </aside>
     )
 }

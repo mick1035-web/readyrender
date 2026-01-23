@@ -223,7 +223,7 @@ export const useStore = create<StoreState>()(
             setEnvBlur: (blur) => set({ envBlur: blur }),
             envOpacity: 1.0,
             setEnvOpacity: (opacity) => set({ envOpacity: opacity }),
-            animationPreset: 'static',
+            animationPreset: 'none',
             setAnimationPreset: (preset) => set({ animationPreset: preset }),
             canvasRef: null,
             setCanvasRef: (ref) => set({ canvasRef: ref }),

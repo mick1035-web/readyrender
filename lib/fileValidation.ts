@@ -15,7 +15,8 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024
 const VALID_EXTENSIONS = {
     models: ['.glb', '.gltf', '.obj', '.fbx'],
     images: ['.png', '.jpg', '.jpeg', '.svg', '.webp'],
-    environments: ['.hdr', '.exr']
+    environments: ['.hdr', '.exr'],
+    avatars: ['.png', '.jpg', '.jpeg', '.webp']
 }
 
 // Valid MIME types by category
@@ -36,6 +37,11 @@ const VALID_MIME_TYPES = {
         'image/vnd.radiance', // .hdr
         'image/x-exr', // .exr
         'application/octet-stream' // Sometimes used for HDR/EXR
+    ],
+    avatars: [
+        'image/png',
+        'image/jpeg',
+        'image/webp'
     ]
 }
 
@@ -44,7 +50,7 @@ const VALID_MIME_TYPES = {
  */
 export function validateFile(
     file: File,
-    category: 'models' | 'images' | 'environments'
+    category: 'models' | 'images' | 'environments' | 'avatars'
 ): FileValidationResult {
     // 1. Check file size (DISABLED - no size limit)
     // Warning: Large files may cause performance issues

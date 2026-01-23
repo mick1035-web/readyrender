@@ -49,6 +49,16 @@ service firebase.storage {
                        || request.resource.contentType.matches('application/octet-stream'));
       allow delete: if isAuthenticated() && isOwner(userId);
     }
+
+    // Avatars
+    match /avatars/{userId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated()
+                   && isOwner(userId)
+                   && isValidSize()
+                   && request.resource.contentType.matches('image/.*');
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
     
     // Thumbnails - read by all authenticated users, write by owner
     match /thumbnails/{fileName} {

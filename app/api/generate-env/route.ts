@@ -7,19 +7,13 @@ const replicate = new Replicate({
 
 export async function POST(request: NextRequest) {
     try {
-        const { prompt } = await request.json()
-
-        if (!prompt || typeof prompt !== 'string') {
-            return NextResponse.json(
-                { error: 'Prompt is required and must be a string' },
-                { status: 400 }
-            )
-        }
+        const { prompt, negativePrompt, parameters } = await request.json()
 
         console.log('Generating 360 panorama with prompt:', prompt)
 
-        // Hardcoded negative prompt to ensure quality
-        const negativePrompt = "low quality, worst quality, distortion, blurry, text, watermark, signature, ugly, tiling, bad geometry, deformed, seams, artifacts"
+        // Default negative prompt if none provided
+        const defaultNegative = "low quality, worst quality, distortion, blurry, text, watermark, signature, ugly, tiling, bad geometry, deformed, seams, artifacts"
+        const finalNegative = negativePrompt || defaultNegative
 
         // Create prediction using predictions API
         // Using igorriti/flux-360 latest version
@@ -27,11 +21,11 @@ export async function POST(request: NextRequest) {
             version: "d26037255a2b298408505e2fbd0bf7703521daca8f07e8c8f335ba874b4aa11a",
             input: {
                 prompt: `seamless 360 panorama, equirectangular projection, ${prompt}`, // Force seamless properties
-                negative_prompt: negativePrompt,
+                negative_prompt: finalNegative,
                 width: 1440,      // Maximum supported by model (confirmed via API error)
                 height: 720,      // 2:1 aspect ratio for 360 panorama
-                num_inference_steps: 50,  // Maximum steps for finest quality
-                guidance_scale: 3.5,      // Standard guidance
+                num_inference_steps: parameters?.num_inference_steps || 50,
+                guidance_scale: parameters?.guidance_scale || 3.5,
             }
         })
 

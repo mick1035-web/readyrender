@@ -22,7 +22,7 @@ function delay(ms: number): Promise<void> {
 export async function uploadFileWithRetry(
     file: File,
     userId: string,
-    folder: 'models' | 'images' | 'environments',
+    folder: 'models' | 'images' | 'environments' | 'avatars',
     onProgress?: (progress: number, attempt?: number) => void,
     maxRetries: number = 3
 ): Promise<string> {
@@ -70,7 +70,7 @@ export async function uploadFileWithRetry(
 export async function uploadFile(
     file: File,
     userId: string,
-    folder: 'models' | 'images' | 'environments',
+    folder: 'models' | 'images' | 'environments' | 'avatars',
     onProgress?: (progress: number) => void
 ): Promise<string> {
     // 1. Validate file using comprehensive validation

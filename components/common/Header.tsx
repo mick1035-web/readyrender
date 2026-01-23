@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter, usePathname } from 'next/navigation'
-import { Video, Home, FolderOpen } from 'lucide-react'
+import { Video, Home, FolderOpen, CreditCard } from 'lucide-react'
 import UserAccountMenu from '@/components/landing/UserAccountMenu'
 import Button from '@/components/ui/Button'
 
@@ -76,6 +76,7 @@ export default function Header() {
                                         : 'text-zinc-400 hover:text-white hover:bg-white/5'
                                         }`}
                                 >
+                                    <CreditCard size={18} />
                                     <span>Pricing</span>
                                 </button>
                             </>
