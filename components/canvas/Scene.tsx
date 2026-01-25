@@ -177,10 +177,17 @@ export default function Scene() {
     }
 
     const envIntensity = getStyleIntensity()
-    const envUrl = hdriMode === 'custom' && activeHdriId
+
+    // Check if using default preset (which accesses a local file)
+    const isDefaultPreset = hdriMode === 'preset' && activeHdriId === 'default'
+
+    const envUrl = hdriMode === 'custom'
         ? customHdris.find(h => h.id === activeHdriId)?.url
-        : null
-    const envPreset = hdriMode === 'preset' && activeHdriId ? activeHdriId : 'none'
+        : isDefaultPreset ? '/default-hdri.exr' : null
+
+    const envPreset = hdriMode === 'preset' && activeHdriId && activeHdriId !== 'default' ? activeHdriId : 'none'
+
+
 
     return (
         <div className="relative w-full h-full">
@@ -210,6 +217,7 @@ export default function Scene() {
                 <Html fullscreen style={{ pointerEvents: 'none', zIndex: 100 }}>
                     <div className="w-full h-full">
                         <AutoGenPopup />
+
                     </div>
                 </Html>
                 <Title3D />

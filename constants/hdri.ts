@@ -5,6 +5,7 @@ export interface PresetEnvironment {
 }
 
 export const PRESET_ENVIRONMENTS: PresetEnvironment[] = [
+    { id: 'default', name: 'Default Studio', category: 'Indoor' },
     { id: 'apartment', name: 'Apartment', category: 'Indoor' },
     { id: 'city', name: 'City', category: 'Urban' },
     { id: 'dawn', name: 'Dawn', category: 'Outdoor' },

@@ -219,6 +219,7 @@ export const useStore = create<StoreState>()(
             setStylePreset: (preset) => set({ stylePreset: preset }),
             customEnvUrl: null,
             setCustomEnvUrl: (url) => set({ customEnvUrl: url }),
+
             envBlur: 0,
             setEnvBlur: (blur) => set({ envBlur: blur }),
             envOpacity: 1.0,
@@ -622,6 +623,7 @@ export const useStore = create<StoreState>()(
             isHdriManagerOpen: false,
             setIsHdriManagerOpen: (isOpen) => set({ isHdriManagerOpen: isOpen }),
 
+
             // Custom HDRIs - managed by Firestore via AuthContext
             customHdris: [],
 
@@ -637,8 +639,8 @@ export const useStore = create<StoreState>()(
             setIsGeneratingEnv: (isGenerating) => set({ isGeneratingEnv: isGenerating }),
 
             // Exclusive HDRI Mode Selection
-            hdriMode: 'none', // CHANGED: Default to none instead of preset
-            activeHdriId: null, // CHANGED: No active HDRI by default
+            hdriMode: 'preset',
+            activeHdriId: 'default', // CHANGED: Set default ID
             setActiveHdri: (mode, id) => set((state) => {
                 if (mode === 'preset') {
                     return {
