@@ -213,7 +213,7 @@ export const useStore = create<StoreState>()(
             modelUrl: null,
             modelType: null,
             setModelUrl: (url, type) => set({ modelUrl: url, modelType: type }),
-            envPreset: 'none',
+            envPreset: 'default',
             setEnvPreset: (preset) => set({ envPreset: preset, customEnvUrl: null }),
             stylePreset: 'natural',
             setStylePreset: (preset) => set({ stylePreset: preset }),
@@ -762,7 +762,7 @@ export const useStore = create<StoreState>()(
             },
 
             // Legacy states
-            selectedPreset: 'none',
+            selectedPreset: 'default',
             setSelectedPreset: (preset) => {
                 get().setActiveHdri('preset', preset)
             },

@@ -82,7 +82,7 @@ export default function EditorPage() {
             ...currentState,
             modelUrl: null,
             modelType: null,
-            envPreset: 'none', // CHANGED: Default to none
+            envPreset: 'default', // CHANGED: Default to 'default'
             stylePreset: 'natural',
             customEnvUrl: null,
             envBlur: 0, // CHANGED: 0% blur
@@ -99,8 +99,8 @@ export default function EditorPage() {
             editingTextId: null,
             editingImageId: null,
             activeObjectId: null,
-            hdriMode: 'none', // CHANGED: Default HDRI mode to none
-            activeHdriId: null, // CHANGED: No active HDRI
+            hdriMode: 'preset', // CHANGED: Default HDRI mode to preset
+            activeHdriId: 'default', // CHANGED: Default 'Default Studio'
             textConfig: {
                 content: "",
                 visible: false,
