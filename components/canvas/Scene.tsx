@@ -260,9 +260,11 @@ export default function Scene() {
                         <meshBasicMaterial color="#6b7280" transparent opacity={0.7} />
                     </mesh>
                 )}
-                <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
-                    <GizmoViewport axisColors={['#ef4444', '#22c55e', '#3b82f6']} labelColor="white" />
-                </GizmoHelper>
+                {!isRendering && (
+                    <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+                        <GizmoViewport axisColors={['#ef4444', '#22c55e', '#3b82f6']} labelColor="white" />
+                    </GizmoHelper>
+                )}
                 <OrbitControls
                     ref={controlsRef}
                     makeDefault
@@ -271,19 +273,21 @@ export default function Scene() {
                     minDistance={1}
                     maxDistance={100}
                 />
-                <Grid
-                    args={[20, 20]}
-                    cellSize={1}
-                    cellThickness={0.5}
-                    cellColor="#6b7280"
-                    sectionSize={5}
-                    sectionThickness={1}
-                    sectionColor="#9ca3af"
-                    fadeDistance={50}
-                    fadeStrength={1}
-                    followCamera={false}
-                    infiniteGrid
-                />
+                {!isRendering && (
+                    <Grid
+                        args={[20, 20]}
+                        cellSize={1}
+                        cellThickness={0.5}
+                        cellColor="#6b7280"
+                        sectionSize={5}
+                        sectionThickness={1}
+                        sectionColor="#9ca3af"
+                        fadeDistance={50}
+                        fadeStrength={1}
+                        followCamera={false}
+                        infiniteGrid
+                    />
+                )}
                 {/* Removed Suspense wrapper - it was causing unnecessary remounts */}
                 <ModelRenderer />
             </Canvas>
